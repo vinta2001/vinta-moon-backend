@@ -1,0 +1,55 @@
+server:
+  port: 9090
+  servlet:
+    context-path: /api
+    session:
+      timeout: PT60M
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/vintaMoon?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&characterSetResults=utf-8&autoReconnect=true&allowMultiQueries=true
+    type: com.alibaba.druid.pool.DruidDataSource
+    username: root
+    password: root
+
+
+  mail:
+    port: 465
+    host: smtp.qq.com
+    username: 737844829@qq.com
+    password: jnlzantfukujbfha
+    default-encoding: UTF-8
+    properties:
+      mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
+      mail.debug: true
+
+jwt:
+  secret-key: 737844829@qq.com!!
+  expire-time: PT60M
+
+
+project:
+  path: D:/vintaMoon
+
+
+admin:
+  emails: 737844829@qq.com
+
+log:
+  root:
+    level: debug
+
+springdoc:
+  swagger-ui:
+    path: /swagger
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match:
+        - '/**'
+      packages-to-scan:
+        - com.vinta
