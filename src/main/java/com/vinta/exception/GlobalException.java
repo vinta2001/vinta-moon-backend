@@ -5,6 +5,7 @@ import com.vinta.entity.vo.ResultVO;
 import com.vinta.enums.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -28,5 +29,11 @@ public class GlobalException {
     public ResultVO handler(BusinessException e) {
         log.error(e.getMessage(), e);
         return ResultVO.failed(e.getCode(),e.getMessage());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResultVO handler(HttpRequestMethodNotSupportedException e) {
+        log.error(e.getMessage(), e);
+        return ResultVO.failed(StatusCode.METHOD_NOT_ALLOWED);
     }
 }

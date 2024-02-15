@@ -13,7 +13,6 @@ spring:
     username: root
     password: root
 
-
   mail:
     port: 465
     host: smtp.qq.com
@@ -28,17 +27,15 @@ jwt:
   secret-key: 737844829@qq.com!!
   expire-time: PT60M
 
-
 project:
-  path: D:/vintaMoon
-
-
+  file:
+    rootPath: D:/vintaMoon
+    videoPath: /file/video
+    imagePath: /file/image
+    audioPath: /file/audio
+    tempPath:  /temp
 admin:
   emails: 737844829@qq.com
-
-log:
-  root:
-    level: debug
 
 springdoc:
   swagger-ui:
@@ -53,3 +50,5 @@ springdoc:
         - '/**'
       packages-to-scan:
         - com.vinta
+test:
+  path: D:/vintaMoon

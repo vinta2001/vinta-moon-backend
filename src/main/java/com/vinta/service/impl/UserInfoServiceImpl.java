@@ -3,6 +3,7 @@ package com.vinta.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.vinta.entity.po.UserInfo;
+import com.vinta.entity.vo.ResultVO;
 import com.vinta.entity.vo.request.LoginRequest;
 import com.vinta.entity.vo.request.RegisterRequest;
 import com.vinta.entity.vo.request.ResetPwdRequest;
@@ -12,6 +13,7 @@ import com.vinta.enums.StatusCode;
 import com.vinta.exception.BusinessException;
 import com.vinta.service.UserInfoService;
 import com.vinta.mapper.UserInfoMapper;
+import com.vinta.utils.FileUtil;
 import com.vinta.utils.VerifyCodeUtil;
 import com.vinta.utils.JWTUtil;
 import com.vinta.utils.RandomUtil;
@@ -20,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author VINTA
@@ -130,7 +133,43 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         userInfo.setPassword(newPassword);
         return userInfoMapper.updateById(userInfo);
     }
+
+    @Override
+    public int uploadProfile(String token, MultipartFile file) {
+        if (token == null) {
+            throw new BusinessException(StatusCode.TOKEN_ERROR);
+        }
+        try {
+            UserInfo userInfo = getUserByToken(token);
+            String userId = userInfo.getUserId();
+            String upload = FileUtil.upload(userId, file);
+            userInfo.setProfile(upload);
+            return userInfoMapper.updateById(userInfo);
+        } catch (Exception e) {
+            throw new BusinessException(StatusCode.UPLOAD_ERROR);
+        }
+    }
+
+    @Override
+    public int updateUserInfo(UserInfo userInfo) {
+        return userInfoMapper.updateById(userInfo);
+    }
+
+    @Override
+    public void downloadProfile(String token, HttpServletResponse response) {
+        if (token == null) {
+            throw new BusinessException(StatusCode.TOKEN_ERROR);
+        }
+        UserInfo userInfo = getUserByToken(token);
+        String profilePath = userInfo.getProfile();
+        if(profilePath == null){
+            FileUtil.getDefaultProfile(response);
+        }
+        FileUtil.download(response, profilePath);
+    }
 }
+
+
 
 
 

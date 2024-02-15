@@ -19,4 +19,10 @@ public class BusinessException extends RuntimeException {
         this.code = statusCode.getCode();
         this.message = statusCode.getMessage();
     }
+
+    public BusinessException(String message) {
+        super(message);
+        this.code = StatusCode.BAD_REQUEST.getCode();
+        this.message = message;
+    }
 }

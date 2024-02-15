@@ -2,7 +2,9 @@ package com.vinta.utils;
 
 import com.vinta.constant.Constants;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class RandomUtil {
@@ -26,7 +28,18 @@ public class RandomUtil {
         return getRandomCode(Constants.CODE_LENGTH);
     }
 
-    public static String getRandomNickName(){
+    public static String getRandomNickName() {
         return "momo";
+    }
+
+    public static String getRandomFileName() {
+        String name = UUID.randomUUID().toString().replace("-", "");
+        DigestUtils.md5Hex(name);
+        String date = String.valueOf((System.currentTimeMillis()));
+        return name + "_" + date;
+    }
+    public static String getRandomFileName(String userId) {
+        String date = String.valueOf((System.currentTimeMillis()));
+        return userId + "_" + date;
     }
 }

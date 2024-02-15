@@ -1,5 +1,6 @@
 package com.vinta.controller;
 
+import com.vinta.entity.po.UserInfo;
 import com.vinta.entity.vo.request.LoginRequest;
 import com.vinta.entity.vo.request.RegisterRequest;
 import com.vinta.entity.vo.ResultVO;
@@ -8,17 +9,19 @@ import com.vinta.entity.vo.response.LoginResponse;
 import com.vinta.enums.StatusCode;
 import com.vinta.exception.BusinessException;
 import com.vinta.service.UserInfoService;
+import com.vinta.utils.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("user")
@@ -72,6 +75,20 @@ public class UserInfoController {
     public ResultVO restPassword(@RequestBody ResetPwdRequest resetPwdRequest) {
         int reset = userInfoService.resetPassword(resetPwdRequest);
         return reset == 1 ? ResultVO.success(StatusCode.OK) : ResultVO.failed(StatusCode.UPDATE_ERROR);
+    }
+
+    @PostMapping("/avatar/upload")
+    @Operation(summary = "上传头像")
+    @Parameter(name = "file", description = "文件", required = true)
+    public ResultVO uploadProfile(@NotBlank @RequestHeader String token, @NotBlank MultipartFile file) {
+        int i = userInfoService.uploadProfile(token, file);
+        return i == 1 ? ResultVO.success(StatusCode.UPLOAD_SUCCESS) : ResultVO.failed(StatusCode.UPLOAD_ERROR);
+    }
+
+    @PostMapping("/avatar/download")
+    @Operation(summary = "下载头像")
+    public void downloadProfile(@NotBlank @RequestHeader String token, HttpServletResponse response) {
+        userInfoService.downloadProfile(token, response);
     }
 }
 

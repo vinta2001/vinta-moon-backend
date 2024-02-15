@@ -8,6 +8,7 @@ import com.vinta.entity.vo.request.ResetPwdRequest;
 import com.vinta.entity.vo.response.LoginResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author VINTA
@@ -25,4 +26,10 @@ public interface UserInfoService extends IService<UserInfo> {
     UserInfo getUserByToken(String token);
 
     int resetPassword(ResetPwdRequest resetPwdRequest);
+
+    int uploadProfile(String token, MultipartFile file);
+
+    int updateUserInfo(UserInfo userInfo);
+
+    void downloadProfile(String token, HttpServletResponse response);
 }

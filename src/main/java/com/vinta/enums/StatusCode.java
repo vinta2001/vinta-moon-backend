@@ -10,8 +10,10 @@ public enum StatusCode {
     CREATE_SUCCESS(200, "注册成功"),
     UPDATE_SUCCESS(200,"更新成功"),
     LOGOUT_SUCCESS(200, "退出成功"),
+    UPLOAD_SUCCESS(200, "上传成功"),
 
     UPDATE_ERROR(201,"更新失败"),
+    UPLOAD_ERROR(201,"上传失败"),
 
     USERNAME_NOT_EXISTS(202, "用户不存在"),
     USER_EXISTS(202, "用户已存在"),
@@ -25,6 +27,7 @@ public enum StatusCode {
     TOKEN_ERROR(204,"用户token失效"),
 
     NOT_FOUND(404, "Not Found"),
+    METHOD_NOT_ALLOWED(402,"Method Not Allowed"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error");
     private final int code;
     private final String message;
