@@ -6,8 +6,8 @@
 
     <resultMap id="BaseResultMap" type="com.vinta.entity.po.UserInfo">
             <id property="userId" column="user_id" jdbcType="VARCHAR"/>
-            <id property="userName" column="user_name" jdbcType="VARCHAR"/>
-            <id property="email" column="email" jdbcType="VARCHAR"/>
+            <result property="userName" column="user_name" jdbcType="VARCHAR"/>
+            <result property="email" column="email" jdbcType="VARCHAR"/>
             <result property="userNickname" column="user_nickname" jdbcType="VARCHAR"/>
             <result property="password" column="password" jdbcType="VARCHAR"/>
             <result property="description" column="description" jdbcType="VARCHAR"/>
