@@ -113,7 +113,7 @@ public class FileUtil {
             throw new BusinessException("文件不存在");
         }
         String fileSuffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
-        String filename = RandomUtil.getRandomFileName(userId) + "." + fileSuffix;
+        String filename = userId + "." + fileSuffix;
         File fileFolder = new File(IMAGE_PATH);
         if (!fileFolder.exists()) {
             fileFolder.mkdirs();

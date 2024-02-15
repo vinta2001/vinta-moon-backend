@@ -2,6 +2,7 @@ package com.vinta.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.vinta.constant.Constants;
 import com.vinta.entity.po.UserInfo;
 import com.vinta.entity.vo.ResultVO;
 import com.vinta.entity.vo.request.LoginRequest;
@@ -23,6 +24,8 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 
 /**
  * @author VINTA
@@ -49,13 +52,16 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
     @Override
     public int register(HttpSession session, RegisterRequest registerRequest) {
-        //判断发送过来的验证码与对话中的数据是否一致
+
+        String attribute = (String)session.getAttribute(Constants.EMAIL_CODE);
+        if(attribute == null){
+            throw new BusinessException(StatusCode.VERIFY_CODE_ERROR);
+        }
         if (userInfoMapper.selectOne(queryWrapper().eq("email", registerRequest.getEmail())) != null) {
             return 0;
         }
         String emailCode = registerRequest.getEmailCode();
         String email = registerRequest.getEmail();
-
         UserInfo userInfo = userInfoMapper.selectOne(queryWrapper().eq("email", email));
         if (userInfo != null) {
             throw new BusinessException(StatusCode.USER_EXISTS);
@@ -156,16 +162,15 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
-    public void downloadProfile(String token, HttpServletResponse response) {
-        if (token == null) {
-            throw new BusinessException(StatusCode.TOKEN_ERROR);
+    public void downloadProfile(String userId, HttpServletResponse response) {
+        if (userId == null) {
+            throw new BusinessException(StatusCode.BAD_REQUEST);
         }
-        UserInfo userInfo = getUserByToken(token);
-        String profilePath = userInfo.getProfile();
-        if(profilePath == null){
+        File file = new File(userId);
+        if (!file.exists()) {
             FileUtil.getDefaultProfile(response);
         }
-        FileUtil.download(response, profilePath);
+        FileUtil.download(response, userId);
     }
 }
 

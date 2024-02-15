@@ -1,6 +1,7 @@
 package com.vinta.controller;
 
 
+import com.vinta.constant.Constants;
 import com.vinta.entity.vo.ResultVO;
 import com.vinta.enums.CodeEnum;
 import com.vinta.enums.StatusCode;
@@ -8,6 +9,8 @@ import com.vinta.exception.BusinessException;
 import com.vinta.utils.VerifyCodeUtil;
 import com.vinta.utils.RandomUtil;
 import com.vinta.utils.RedisUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 
@@ -23,6 +26,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/code")
 @Slf4j
+@Tag(name = "验证码")
 public class CodeController {
 
     @Resource
@@ -36,6 +40,7 @@ public class CodeController {
      * @return
      */
     @GetMapping("email-code")
+    @Operation(summary = "发送邮箱验证码")
     public ResultVO sendEmailCode(HttpSession session,
                                           @RequestParam(value = "type", required = true) Integer type,
                                           @RequestParam(value = "email", required = true) String email) {
@@ -46,6 +51,7 @@ public class CodeController {
     }
 
     @GetMapping("picture-code")
+    @Operation(summary = "发送图片验证码")
     public ResultVO sendPictureCode(HttpSession session,
                                     @RequestParam(value = "type", required = true) Integer type,
                                     @RequestParam(value = "email", required = true) String email) {
@@ -58,6 +64,8 @@ public class CodeController {
 
     public void sendEmailCode(HttpSession session, String email) {
         String emailCode = RandomUtil.getRandomEmailCode();
+        session.setAttribute(Constants.EMAIL_CODE, emailCode);
+        System.out.println(session.getAttribute(Constants.EMAIL_CODE));
         verifyCodeUtil.sendEmailCode(email, emailCode);
     }
 
@@ -67,7 +75,4 @@ public class CodeController {
         session.setAttribute(CodeEnum.PICTURE_CODE.getDesc(), emailCode);
         verifyCodeUtil.sendEmailCode(email, emailCode);
     }
-
-
-
 }

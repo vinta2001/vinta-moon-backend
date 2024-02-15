@@ -1,5 +1,6 @@
 package com.vinta.controller;
 
+import com.vinta.constant.Constants;
 import com.vinta.entity.po.UserInfo;
 import com.vinta.entity.vo.request.LoginRequest;
 import com.vinta.entity.vo.request.RegisterRequest;
@@ -34,14 +35,18 @@ public class UserInfoController {
     @Operation(summary = "用户登录")
     @Parameter(name = "loginRequest", description = "登录信息", required = true)
     @PostMapping("/login")
-    public ResultVO login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public ResultVO login(HttpSession session,
+                          @RequestBody LoginRequest loginRequest,
+                          HttpServletResponse response) {
         LoginResponse userInfo = userInfoService.login(loginRequest,response);
+
         if (userInfo == null) {
             return ResultVO.failed(StatusCode.USERNAME_NOT_EXISTS);
         }
         if (userInfo.getToken() == null) {
             return ResultVO.failed(StatusCode.PASSWORD_ERROR);
         }
+        session.setAttribute(Constants.USER_TOKEN_KEY,userInfo.getToken());
         return ResultVO.ok(userInfo);
     }
 
@@ -49,15 +54,14 @@ public class UserInfoController {
     @Operation(summary = "用户注册")
     @Parameter(name = "registerRequest", description = "注册信息", required = true)
     public ResultVO register(HttpSession session, @RequestBody RegisterRequest registerRequest) {
-
         int register = userInfoService.register(session, registerRequest);
         return register == 1 ? ResultVO.success(StatusCode.CREATE_SUCCESS) : ResultVO.failed(StatusCode.USER_EXISTS);
     }
 
-    @PostMapping("/logout")
+    @GetMapping("/logout")
     @Operation(summary = "用户退出")
     public ResultVO logout(HttpSession session) {
-        session.invalidate();
+        session.removeAttribute(Constants.USER_TOKEN_KEY);
         return ResultVO.success(StatusCode.LOGOUT_SUCCESS);
     }
 
@@ -69,7 +73,7 @@ public class UserInfoController {
         return updatePassword == 1 ? ResultVO.success(StatusCode.UPDATE_SUCCESS) : ResultVO.failed(StatusCode.UPDATE_ERROR);
     }
 
-    @PostMapping("/rest")
+    @PostMapping("/reset")
     @Operation(summary = "找回密码")
     @Parameter(name = "resetPwdRequest", description = "resetPwdRequest", required = true)
     public ResultVO restPassword(@RequestBody ResetPwdRequest resetPwdRequest) {
@@ -80,15 +84,17 @@ public class UserInfoController {
     @PostMapping("/avatar/upload")
     @Operation(summary = "上传头像")
     @Parameter(name = "file", description = "文件", required = true)
-    public ResultVO uploadProfile(@NotBlank @RequestHeader String token, @NotBlank MultipartFile file) {
+    public ResultVO uploadProfile(@NotBlank @RequestHeader String token,
+                                  @NotBlank MultipartFile file) {
         int i = userInfoService.uploadProfile(token, file);
         return i == 1 ? ResultVO.success(StatusCode.UPLOAD_SUCCESS) : ResultVO.failed(StatusCode.UPLOAD_ERROR);
     }
 
-    @PostMapping("/avatar/download")
+    @GetMapping("/avatar/download/{userId}")
     @Operation(summary = "下载头像")
-    public void downloadProfile(@NotBlank @RequestHeader String token, HttpServletResponse response) {
-        userInfoService.downloadProfile(token, response);
+    public void downloadProfile(@NotBlank @PathVariable String userId,
+                                HttpServletResponse response) {
+        userInfoService.downloadProfile(userId, response);
     }
 }
 
