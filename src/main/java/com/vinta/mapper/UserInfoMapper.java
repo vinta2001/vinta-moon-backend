@@ -2,6 +2,7 @@ package com.vinta.mapper;
 
 import com.vinta.entity.po.UserInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
 * @author VINTA
@@ -12,6 +13,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 public interface UserInfoMapper extends BaseMapper<UserInfo> {
 
     UserInfo login(String email);
+
+    UserInfo selectByUserId(@Param("userId") String id);
 }
 
 

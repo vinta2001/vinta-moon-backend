@@ -2,10 +2,10 @@ package com.vinta.service;
 
 import com.vinta.entity.po.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.vinta.entity.vo.request.LoginRequest;
-import com.vinta.entity.vo.request.RegisterRequest;
-import com.vinta.entity.vo.request.ResetPwdRequest;
-import com.vinta.entity.vo.response.LoginResponse;
+import com.vinta.entity.vo.LoginBodyVO;
+import com.vinta.entity.vo.RegisterBodyVO;
+import com.vinta.entity.vo.ResetPwdBodyVO;
+import com.vinta.entity.dto.LoginResultDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,19 +17,21 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface UserInfoService extends IService<UserInfo> {
 
-    int register(HttpSession session,RegisterRequest registerRequest);
+    int register(HttpSession session, RegisterBodyVO registerBodyVO);
 
-    LoginResponse login(LoginRequest loginRequest, HttpServletResponse response);
+    LoginResultDTO login(LoginBodyVO loginBodyVO, HttpServletResponse response);
 
-    int updatePassword(ResetPwdRequest resetPwdRequest);
+    int updatePassword(ResetPwdBodyVO resetPwdBodyVO);
 
     UserInfo getUserByToken(String token);
 
-    int resetPassword(ResetPwdRequest resetPwdRequest);
+    int resetPassword(ResetPwdBodyVO resetPwdBodyVO);
 
     int uploadProfile(String token, MultipartFile file);
 
     int updateUserInfo(UserInfo userInfo);
 
     void downloadProfile(String token, HttpServletResponse response);
+
+    UserInfo getUserByUserId(String id);
 }

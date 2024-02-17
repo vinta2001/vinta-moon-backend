@@ -36,4 +36,7 @@
     <select id="login" resultType="com.vinta.entity.po.UserInfo">
         select * from user_info where email = #{email}
     </select>
+    <select id="selectByUserId" resultType="com.vinta.entity.po.UserInfo">
+        select * from user_info where user_id = #{userId}
+    </select>
 </mapper>

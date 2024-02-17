@@ -1,4 +1,4 @@
-package com.vinta.entity.vo.request;
+package com.vinta.entity.vo;
 
 
 import jakarta.validation.constraints.Email;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class ResetPwdRequest {
+public class ResetPwdBodyVO {
     @Email
     @NotBlank
     private String email;

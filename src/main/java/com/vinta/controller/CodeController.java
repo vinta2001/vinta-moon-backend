@@ -2,10 +2,9 @@ package com.vinta.controller;
 
 
 import com.vinta.constant.Constants;
-import com.vinta.entity.vo.ResultVO;
+import com.vinta.entity.dto.ResultDTO;
 import com.vinta.enums.CodeEnum;
 import com.vinta.enums.StatusCode;
-import com.vinta.exception.BusinessException;
 import com.vinta.utils.VerifyCodeUtil;
 import com.vinta.utils.RandomUtil;
 import com.vinta.utils.RedisUtil;
@@ -41,25 +40,27 @@ public class CodeController {
      */
     @GetMapping("email-code")
     @Operation(summary = "发送邮箱验证码")
-    public ResultVO sendEmailCode(HttpSession session,
-                                          @RequestParam(value = "type", required = true) Integer type,
-                                          @RequestParam(value = "email", required = true) String email) {
-        if (Objects.equals(type, CodeEnum.EMAIL_CODE.getType())) {
+    public ResultDTO sendEmailCode(HttpSession session,
+                                   @RequestParam(value = "type", required = true) Integer type,
+                                   @RequestParam(value = "email", required = true) String email) {
+        CodeEnum codeEnum = CodeEnum.getCodeEnumByType(type);
+        assert codeEnum != null;
+        if (Objects.equals(type, codeEnum.getType())) {
             sendEmailCode(session, email);
         }
-        return ResultVO.success(StatusCode.EMAIL_CODE_SEND_SUCCESS);
+        return ResultDTO.success(StatusCode.EMAIL_CODE_SEND_SUCCESS);
     }
 
     @GetMapping("picture-code")
     @Operation(summary = "发送图片验证码")
-    public ResultVO sendPictureCode(HttpSession session,
-                                    @RequestParam(value = "type", required = true) Integer type,
-                                    @RequestParam(value = "email", required = true) String email) {
+    public ResultDTO sendPictureCode(HttpSession session,
+                                     @RequestParam(value = "type", required = true) Integer type,
+                                     @RequestParam(value = "email", required = true) String email) {
         System.out.println(email);
         if (Objects.equals(type, CodeEnum.PICTURE_CODE.getType())) {
             sendPictureCode(session, email);
         }
-        return ResultVO.failed(StatusCode.BAD_REQUEST);
+        return ResultDTO.failed(StatusCode.BAD_REQUEST);
     }
 
     public void sendEmailCode(HttpSession session, String email) {

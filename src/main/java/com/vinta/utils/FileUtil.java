@@ -29,6 +29,16 @@ public class FileUtil {
 
     private static final String DEFAULT_AVATAR = "default_avatar.jpg";
 
+    public static void getProfile(HttpServletResponse response, String userId) {
+        String filePath = IMAGE_PATH + userId + ".jpg";
+        File file = new File(filePath);
+        if(file.exists()) {
+            download(response, filePath);
+        } else {
+            getDefaultProfile(response);
+        }
+    }
+
 
     @Value("${project.file.tempPath}")
     public void setTempPath(String tempPath) {

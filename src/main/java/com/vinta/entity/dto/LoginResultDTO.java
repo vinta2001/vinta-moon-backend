@@ -1,11 +1,10 @@
-package com.vinta.entity.vo.response;
+package com.vinta.entity.dto;
 
 
 import lombok.Data;
 
 @Data
-public class LoginResponse {
-    private String token;
+public class LoginResultDTO {
     private String id;
     private String username;
     private String email;

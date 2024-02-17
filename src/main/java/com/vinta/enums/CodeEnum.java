@@ -12,4 +12,13 @@ public enum CodeEnum {
         this.desc=desc;
         this.type=type;
     }
+
+    public static CodeEnum getCodeEnumByType(Integer type){
+        for (CodeEnum codeEnum : CodeEnum.values()) {
+            if(codeEnum.getType().equals(type)){
+                return codeEnum;
+            }
+        }
+        return null;
+    }
 }

@@ -4,12 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.vinta.constant.Constants;
 import com.vinta.entity.po.UserInfo;
-import com.vinta.entity.vo.ResultVO;
-import com.vinta.entity.vo.request.LoginRequest;
-import com.vinta.entity.vo.request.RegisterRequest;
-import com.vinta.entity.vo.request.ResetPwdRequest;
-import com.vinta.entity.vo.response.LoginResponse;
-import com.vinta.enums.CodeEnum;
+import com.vinta.entity.vo.LoginBodyVO;
+import com.vinta.entity.vo.RegisterBodyVO;
+import com.vinta.entity.vo.ResetPwdBodyVO;
+import com.vinta.entity.dto.LoginResultDTO;
 import com.vinta.enums.StatusCode;
 import com.vinta.exception.BusinessException;
 import com.vinta.service.UserInfoService;
@@ -24,8 +22,6 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
 
 /**
  * @author VINTA
@@ -51,17 +47,14 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     private VerifyCodeUtil verifyCodeUtil;
 
     @Override
-    public int register(HttpSession session, RegisterRequest registerRequest) {
+    public int register(HttpSession session, RegisterBodyVO registerBodyVO) {
 
         String attribute = (String)session.getAttribute(Constants.EMAIL_CODE);
         if(attribute == null){
             throw new BusinessException(StatusCode.VERIFY_CODE_ERROR);
         }
-        if (userInfoMapper.selectOne(queryWrapper().eq("email", registerRequest.getEmail())) != null) {
-            return 0;
-        }
-        String emailCode = registerRequest.getEmailCode();
-        String email = registerRequest.getEmail();
+        String emailCode = registerBodyVO.getEmailCode();
+        String email = registerBodyVO.getEmail();
         UserInfo userInfo = userInfoMapper.selectOne(queryWrapper().eq("email", email));
         if (userInfo != null) {
             throw new BusinessException(StatusCode.USER_EXISTS);
@@ -70,7 +63,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         if (!checkCode) {
             throw new BusinessException(StatusCode.CODE_EXPIRED);
         }
-        String password = registerRequest.getPassword();
+        String password = registerBodyVO.getPassword();
         userInfo = new UserInfo();
         String userId = RandomUtil.getUUID();
         String username = RandomUtil.getRandomUsername();
@@ -83,33 +76,31 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
-    public LoginResponse login(LoginRequest loginRequest, HttpServletResponse response) {
-        String email = loginRequest.getEmail();
-        String password = loginRequest.getPassword();
+    public LoginResultDTO login(LoginBodyVO loginBodyVO, HttpServletResponse response) {
+        String email = loginBodyVO.getEmail();
+        String password = loginBodyVO.getPassword();
         UserInfo userInfo = userInfoMapper.login(email);
 
-        LoginResponse loginResponse = new LoginResponse();
+        LoginResultDTO loginResultDTO = new LoginResultDTO();
         if (userInfo == null) {
-            return null;
+            throw new BusinessException(StatusCode.USERNAME_NOT_EXISTS);
         }
         if (!password.equals(userInfo.getPassword())) {
-            loginResponse.setId(userInfo.getUserId());
-            return loginResponse;
+            throw new BusinessException(StatusCode.PASSWORD_ERROR);
         }
         String token = jwtUtil.createToken(userInfo.getUserId(), null);
         response.setHeader("Authorization", token);
-        loginResponse.setId(userInfo.getUserId());
-        loginResponse.setToken(token);
-        loginResponse.setEmail(userInfo.getEmail());
-        loginResponse.setUsername(userInfo.getUserName());
-        return loginResponse;
+        loginResultDTO.setId(userInfo.getUserId());
+        loginResultDTO.setEmail(userInfo.getEmail());
+        loginResultDTO.setUsername(userInfo.getUserName());
+        return loginResultDTO;
     }
 
     @Override
-    public int updatePassword(ResetPwdRequest resetPwdRequest) {
-        String email = resetPwdRequest.getEmail();
-        String newPassword = resetPwdRequest.getNewPassword();
-        String oldPassword = resetPwdRequest.getOldPassword();
+    public int updatePassword(ResetPwdBodyVO resetPwdBodyVO) {
+        String email = resetPwdBodyVO.getEmail();
+        String newPassword = resetPwdBodyVO.getNewPassword();
+        String oldPassword = resetPwdBodyVO.getOldPassword();
         UserInfo userInfo = userInfoMapper.selectOne(queryWrapper().eq("email", email));
         if (userInfo == null) {
             throw new BusinessException(StatusCode.USERNAME_NOT_EXISTS);
@@ -129,9 +120,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
-    public int resetPassword(ResetPwdRequest resetPwdRequest) {
-        String email = resetPwdRequest.getEmail();
-        String newPassword = resetPwdRequest.getNewPassword();
+    public int resetPassword(ResetPwdBodyVO resetPwdBodyVO) {
+        String email = resetPwdBodyVO.getEmail();
+        String newPassword = resetPwdBodyVO.getNewPassword();
         UserInfo userInfo = userInfoMapper.selectOne(queryWrapper().eq("email", email));
         if (userInfo == null) {
             throw new BusinessException(StatusCode.USERNAME_NOT_EXISTS);
@@ -166,11 +157,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         if (userId == null) {
             throw new BusinessException(StatusCode.BAD_REQUEST);
         }
-        File file = new File(userId);
-        if (!file.exists()) {
-            FileUtil.getDefaultProfile(response);
-        }
-        FileUtil.download(response, userId);
+        FileUtil.getProfile(response, userId);
+    }
+
+    @Override
+    public UserInfo getUserByUserId(String id) {
+        return userInfoMapper.selectByUserId(id);
     }
 }
 

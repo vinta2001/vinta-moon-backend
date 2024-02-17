@@ -30,10 +30,10 @@ jwt:
 project:
   file:
     rootPath: D:/vintaMoon
-    videoPath: /file/video
-    imagePath: /file/image
-    audioPath: /file/audio
-    tempPath:  /temp
+    videoPath: /file/video/
+    imagePath: /file/image/
+    audioPath: /file/audio/
+    tempPath:  temp/
 admin:
   emails: 737844829@qq.com
 
