@@ -7,10 +7,12 @@ import com.vinta.enums.CodeEnum;
 import com.vinta.enums.StatusCode;
 import com.vinta.utils.VerifyCodeUtil;
 import com.vinta.utils.RandomUtil;
-import com.vinta.utils.RedisUtil;
+import com.vinta.component.RedisComponent;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,35 +34,26 @@ public class CodeController {
     private VerifyCodeUtil verifyCodeUtil;
 
     @Resource
-    private RedisUtil redisUtil;
+    private RedisComponent redisComponent;
 
     /**
      * @param type:1表示邮箱验证码 0表示图片验证码
      * @return
      */
-    @GetMapping("email-code")
-    @Operation(summary = "发送邮箱验证码")
+    @GetMapping("verifyCode")
+    @Operation(summary = "发送邮箱验证码",description = "type:1表示邮箱验证码 0表示图片验证码")
     public ResultDTO sendEmailCode(HttpSession session,
-                                   @RequestParam(value = "type", required = true) Integer type,
-                                   @RequestParam(value = "email", required = true) String email) {
+                                   HttpServletResponse response,
+                                   @RequestParam(value = "type") Integer type,
+                                   @RequestParam(value = "email") String email) {
         CodeEnum codeEnum = CodeEnum.getCodeEnumByType(type);
         assert codeEnum != null;
-        if (Objects.equals(type, codeEnum.getType())) {
+        if (Objects.equals(codeEnum.getType(), CodeEnum.EMAIL_CODE.getType())) {
             sendEmailCode(session, email);
+        } else if (Objects.equals(codeEnum.getType(), CodeEnum.PICTURE_CODE.getType())){
+            sendPictureCode(session,response);
         }
         return ResultDTO.success(StatusCode.EMAIL_CODE_SEND_SUCCESS);
-    }
-
-    @GetMapping("picture-code")
-    @Operation(summary = "发送图片验证码")
-    public ResultDTO sendPictureCode(HttpSession session,
-                                     @RequestParam(value = "type", required = true) Integer type,
-                                     @RequestParam(value = "email", required = true) String email) {
-        System.out.println(email);
-        if (Objects.equals(type, CodeEnum.PICTURE_CODE.getType())) {
-            sendPictureCode(session, email);
-        }
-        return ResultDTO.failed(StatusCode.BAD_REQUEST);
     }
 
     public void sendEmailCode(HttpSession session, String email) {
@@ -70,10 +63,7 @@ public class CodeController {
         verifyCodeUtil.sendEmailCode(email, emailCode);
     }
 
-    public void sendPictureCode(HttpSession session, String email) {
-        String emailCode = RandomUtil.getRandomEmailCode();
-        session.setAttribute("type", CodeEnum.PICTURE_CODE.getType());
-        session.setAttribute(CodeEnum.PICTURE_CODE.getDesc(), emailCode);
-        verifyCodeUtil.sendEmailCode(email, emailCode);
+    public void sendPictureCode(HttpSession session,HttpServletResponse response) {
+        //todo 发送图片验证码
     }
 }

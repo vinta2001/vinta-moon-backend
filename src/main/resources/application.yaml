@@ -6,6 +6,10 @@ server:
       timeout: PT60M
 
 spring:
+  servlet:
+    multipart:
+     max-file-size: 15MB
+     max-request-size: 15MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/vintaMoon?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&characterSetResults=utf-8&autoReconnect=true&allowMultiQueries=true
@@ -34,6 +38,8 @@ project:
     imagePath: /file/image/
     audioPath: /file/audio/
     tempPath:  temp/
+    headerImagePath: header/
+    postImagePath: post/
 admin:
   emails: 737844829@qq.com
 

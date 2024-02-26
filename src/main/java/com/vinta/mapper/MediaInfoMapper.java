@@ -12,6 +12,8 @@ import java.util.List;
 * @createDate 2024-02-17 16:14:58
 * @Entity com.vinta.entity.po.MediaInfo
 */
+
+
 public interface MediaInfoMapper extends BaseMapper<MediaInfo> {
 
     List<String> selectMediaByPostId(@Param("postId") String postId);

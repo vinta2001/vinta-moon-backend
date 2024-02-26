@@ -2,6 +2,7 @@ package com.vinta.service;
 
 import com.vinta.entity.po.MediaInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.vinta.entity.vo.MediaBodyVO;
 import com.vinta.entity.vo.PostBodyVO;
 
 import java.util.List;
@@ -15,5 +16,9 @@ public interface MediaInfoService extends IService<MediaInfo> {
 
     List<String> getMediaByPostId(String postId);
 
-    int insertOne(String fileMd5,String userId,String postId, String filename);
+
+    MediaInfo selectByMd5(String md5);
+
+    int insertAll(PostBodyVO postBodyVO);
+
 }

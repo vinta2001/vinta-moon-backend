@@ -3,15 +3,19 @@ package com.vinta.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.vinta.entity.po.MediaInfo;
+import com.vinta.entity.vo.MediaBodyVO;
 import com.vinta.entity.vo.PostBodyVO;
 import com.vinta.enums.MediaType;
 import com.vinta.service.MediaInfoService;
 import com.vinta.mapper.MediaInfoMapper;
+import com.vinta.utils.RandomUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author VINTA
@@ -32,19 +36,30 @@ public class MediaInfoServiceImpl extends ServiceImpl<MediaInfoMapper, MediaInfo
 
 
     @Override
-    public int insertOne(String fileMd5,String userId,String postId, String filename) {
-        String fileSuffix = filename.split("\\.")[1];
-        MediaType mediaType = MediaType.getMediaTypeByName(fileSuffix);
-        MediaInfo mediaInfo = new MediaInfo();
-        mediaInfo.setMediaMd5(fileMd5);
-        mediaInfo.setPhotoUrl(filename);
-        mediaInfo.setUserId(userId);
-        mediaInfo.setPostId(postId);
-        mediaInfo.setPostTime(new Date());
-        assert mediaType != null;
-        mediaInfo.setMediaType(mediaType.getType());
-        return mediaInfoMapper.insert(mediaInfo);
+    public MediaInfo selectByMd5(String md5) {
+        return mediaInfoMapper.selectOne(new QueryWrapper<MediaInfo>().eq("media_md5", md5));
     }
+
+    @Override
+    public int insertAll(PostBodyVO postBodyVO) {
+        List<String> mediaList = postBodyVO.getMediaList();
+        String type = postBodyVO.getType();
+        MediaInfo mediaInfo = new MediaInfo();
+        int result = 0;
+        for (String media : mediaList) {
+            mediaInfo.setPostId(postBodyVO.getPostId());
+            mediaInfo.setMediaType(Objects.requireNonNull(MediaType.getMediaTypeByName(type)).getType());
+            mediaInfo.setUserId(postBodyVO.getUserId());
+            mediaInfo.setPhotoId(media.split("\\.")[0]);
+            mediaInfo.setPhotoUrl(media);
+            mediaInfo.setPostTime(postBodyVO.getCreateTime());
+            mediaInfo.setMediaMd5(media.split("\\.")[0]);
+            result += mediaInfoMapper.insert(mediaInfo);
+        }
+        return result;
+    }
+
+
 }
 
 

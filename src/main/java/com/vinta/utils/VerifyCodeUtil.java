@@ -1,6 +1,7 @@
 package com.vinta.utils;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.vinta.component.RedisComponent;
 import com.vinta.entity.po.UserInfo;
 import com.vinta.enums.StatusCode;
 import com.vinta.exception.BusinessException;
@@ -21,7 +22,7 @@ public class VerifyCodeUtil {
     private JavaMailSender javaMailSender;
 
     @Resource
-    private RedisUtil redisUtil;
+    private RedisComponent redisComponent;
 
     @Resource
     private UserInfoMapper userInfoMapper;
@@ -50,17 +51,17 @@ public class VerifyCodeUtil {
             throw new BusinessException(StatusCode.EMAIL_ERROR);
         }
 //        将验证码保存到redis并设置过期时间
-        redisUtil.setVerifyCode(email, emailCode);
+        redisComponent.setVerifyCode(email, emailCode);
     }
 
     public boolean checkCode(String email, String emailCode) {
 //        System.out.println(email+"checkCode(String email, String emailCode)");
-        String code = (String) redisUtil.getVerifyCode(email);
+        String code = (String) redisComponent.getVerifyCode(email);
         if (code == null) {
             throw new BusinessException(StatusCode.CODE_EXPIRED);
         }
         if (Objects.equals(emailCode, code)) {
-            String delete = (String) redisUtil.deleteVerifyCode(email);
+            String delete = (String) redisComponent.deleteVerifyCode(email);
             return delete != null;
         }
         return false;

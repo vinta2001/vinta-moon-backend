@@ -58,7 +58,7 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo>
         postInfo.setCommentsNum(0L);
         postInfo.setThumbNum(0L);
         postInfo.setCollectNum(0L);
-        postInfo.setPostTime(new Date());
+        postInfo.setPostTime(postBodyVO.getCreateTime());
         postInfo.setTags(String.join(",", postBodyVO.getTagList()));
         //todo 添加分类
         return postInfoMapper.insert(postInfo);

@@ -1,19 +1,21 @@
-package com.vinta.utils;
+package com.vinta.component;
 
 
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class RedisUtil {
-    private String tableName = "user:code:";
+public class RedisComponent {
+    private static final String codeTable = "user:code:";
 
+    private static final String fileTempTable = "user:file:temp:";
 
     @Resource
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     public boolean hasKey(String key) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
@@ -47,20 +49,29 @@ public class RedisUtil {
     }
 
     public <T> T deleteVerifyCode(String key) {
-        key=tableName+key;
+        key=codeTable+key;
         Object result = redisTemplate.opsForValue().get(key);
         redisTemplate.delete(key);
         return (T) result;
     }
 
     public <T> T getVerifyCode(String key) {
-        key = tableName + key;
+        key = codeTable + key;
         System.out.println(key+"getVerifyCode(String key)");
         return (T) redisTemplate.opsForValue().get(key);
     }
 
     public <T> void setVerifyCode(String key, T value) {
-        key = tableName + key;
+        key = codeTable + key;
         set(key, value, 3, TimeUnit.MINUTES);
+    }
+
+    // 向redis中存放map
+    public void setFileInfo2Temp(String key, Map<String, Object> value) {
+        redisTemplate.opsForHash().put(fileTempTable, key, value);
+    }
+
+    public Map<String, Object> getFileInfoFromTemp(String key) {
+        return (Map<String, Object>) redisTemplate.opsForHash().get(fileTempTable, key);
     }
 }

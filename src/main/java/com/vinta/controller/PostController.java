@@ -40,6 +40,14 @@ public class PostController {
     @Resource
     private PostInfoService postInfoService;
 
+    @PostMapping("/note/upload")
+    @Operation(summary = "上传笔记")
+    public ResultDTO uploadPost(@RequestBody PostBodyVO postBodyVO) {
+        int post = postInfoService.insertOne(postBodyVO);
+        int media = mediaInfoService.insertAll(postBodyVO);
+        return post == 1 && media!=0 ? ResultDTO.success(StatusCode.UPDATE_SUCCESS) : ResultDTO.failed(StatusCode.UPLOAD_ERROR);
+    }
+
     private PaginationResultDTO<PostResultVO> getResultVOPaginationResultDTO(PaginationBodyVO paginationBodyVO, IPage<PostInfo> postInfoIPage, List<PostResultVO> postResultVOS) {
         PaginationResultDTO<PostResultVO> postResultVOPaginationResultDTO = new PaginationResultDTO<>();
         postResultVOPaginationResultDTO.setCursorScore(paginationBodyVO.getCursorScore());
@@ -79,7 +87,6 @@ public class PostController {
     @PostMapping("/note/feed")
     @Operation(summary = "获取笔记")
     public ResultDTO getPost(@RequestBody PaginationBodyVO paginationBodyVO) {
-
         IPage<PostInfo> postInfoIPage = postInfoService.findPostListByQuery(paginationBodyVO);
         List<PostInfo> records = postInfoIPage.getRecords();
         List<PostResultVO> postResultVOS = new ArrayList<>();
@@ -91,21 +98,8 @@ public class PostController {
         return ResultDTO.ok(postResultVOPaginationResultDTO);
     }
 
-    @PostMapping("/note/upload")
-    @Operation(summary = "上传笔记")
-    public ResultDTO uploadPost(@RequestBody PostBodyVO postBodyVO) {
-        int res = postInfoService.insertOne(postBodyVO);
-        // todo 查询文件
-        return res==1?ResultDTO.success(StatusCode.UPDATE_SUCCESS):ResultDTO.failed(StatusCode.UPLOAD_ERROR);
-    }
-
     @GetMapping("/comment/feed")
-    @Operation(summary = "获取评论",
-            parameters = {
-                    @Parameter(name = "num", description = "获取的数量", required = true),
-                    @Parameter(name = "note_id", description = "笔记id", required = true),
-                    @Parameter(name = "root_comment_id", description = "根评论id", required = true)
-            })
+    @Operation(summary = "获取评论")
     public ResultDTO getComment(@RequestParam("note_id") String postId,
                                 @RequestParam("root_comment_id") String rootCommentId,
                                 @RequestParam("num") Integer num) {
@@ -113,12 +107,7 @@ public class PostController {
     }
 
     @GetMapping("/comment/upload")
-    @Operation(summary = "上传评论",
-            parameters = {
-                    @Parameter(name = "user_id", description = "用户id", required = true),
-                    @Parameter(name = "root_comment_id", description = "根评论id", required = true),
-                    @Parameter(name = "content", description = "评论内容", required = true)
-            })
+    @Operation(summary = "上传评论")
     public ResultDTO uploadComment(@NotBlank @RequestHeader("Authorization") String Authorization,
                                    @RequestParam("root_comment_id") String rootCommentId,
                                    @RequestParam("content") String content) {

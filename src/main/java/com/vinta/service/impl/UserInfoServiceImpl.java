@@ -12,7 +12,7 @@ import com.vinta.enums.StatusCode;
 import com.vinta.exception.BusinessException;
 import com.vinta.service.UserInfoService;
 import com.vinta.mapper.UserInfoMapper;
-import com.vinta.utils.FileUtil;
+import com.vinta.utils.FileComponent;
 import com.vinta.utils.VerifyCodeUtil;
 import com.vinta.utils.JWTUtil;
 import com.vinta.utils.RandomUtil;
@@ -37,6 +37,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
     @Resource
     private UserInfoMapper userInfoMapper;
+
+    @Resource
+    private FileComponent fileComponent;
 
     @Bean
     private QueryWrapper<UserInfo> queryWrapper() {
@@ -139,7 +142,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         try {
             UserInfo userInfo = getUserByToken(token);
             String userId = userInfo.getUserId();
-            String upload = FileUtil.upload(userId, file);
+            String upload = fileComponent.upload(userId, file);
             userInfo.setProfile(upload);
             return userInfoMapper.updateById(userInfo);
         } catch (Exception e) {
@@ -157,7 +160,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         if (userId == null) {
             throw new BusinessException(StatusCode.BAD_REQUEST);
         }
-        FileUtil.getProfile(response, userId);
+        fileComponent.getProfile(response, userId);
     }
 
     @Override

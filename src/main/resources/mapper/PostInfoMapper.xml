@@ -6,7 +6,7 @@
 
     <resultMap id="BaseResultMap" type="com.vinta.entity.po.PostInfo">
             <id property="postId" column="post_id" jdbcType="VARCHAR"/>
-            <id property="userId" column="user_id" jdbcType="VARCHAR"/>
+            <result property="userId" column="user_id" jdbcType="VARCHAR"/>
             <result property="description" column="description" jdbcType="VARCHAR"/>
             <result property="textContent" column="text_content" jdbcType="VARCHAR"/>
             <result property="postTime" column="post_time" jdbcType="TIMESTAMP"/>

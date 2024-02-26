@@ -35,11 +35,9 @@ public class RandomUtil {
     public static String getRandomFileName() {
         String name = UUID.randomUUID().toString().replace("-", "");
         DigestUtils.md5Hex(name);
-        String date = String.valueOf((System.currentTimeMillis()));
-        return name + "_" + date;
+        return name;
     }
-    public static String getRandomFileName(String userId) {
-        String date = String.valueOf((System.currentTimeMillis()));
-        return userId + "_" + date;
+    public static String getRandomFileNameById(String userId) {
+        return "_user_hd_"+userId;
     }
 }

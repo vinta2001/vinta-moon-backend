@@ -7,7 +7,7 @@
     <resultMap id="BaseResultMap" type="com.vinta.entity.po.MediaInfo">
             <id property="photoId" column="photo_id" jdbcType="VARCHAR"/>
             <id property="postId" column="post_id" jdbcType="VARCHAR"/>
-            <id property="userId" column="user_id" jdbcType="VARCHAR"/>
+            <result property="userId" column="user_id" jdbcType="VARCHAR"/>
             <result property="photoUrl" column="photo_url" jdbcType="VARCHAR"/>
             <result property="postTime" column="post_time" jdbcType="TIMESTAMP"/>
             <result property="mediaType" column="media_type" jdbcType="TINYINT"/>
