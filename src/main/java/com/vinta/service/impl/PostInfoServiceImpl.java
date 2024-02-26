@@ -13,6 +13,7 @@ import com.vinta.utils.RandomUtil;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -48,6 +49,7 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo>
     }
 
     @Override
+    @Transactional
     public int insertOne(PostBodyVO postBodyVO) {
         PostInfo postInfo = new PostInfo();
         postInfo.setPostId(postBodyVO.getPostId());

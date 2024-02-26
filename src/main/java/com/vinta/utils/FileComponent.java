@@ -12,11 +12,15 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.commons.io.FileUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -53,6 +57,11 @@ public class FileComponent {
 
     @Resource
     private RedisComponent redisComponent;
+
+    @Resource
+    @Lazy
+    private FileComponent fileComponent;
+
 
     private static final String DEFAULT_AVATAR = "default_avatar.jpg";
 
@@ -121,6 +130,8 @@ public class FileComponent {
         return filename;
     }
 
+
+    @Transactional(rollbackFor = Exception.class)
     public MediaDTO upload2Temp(MediaBodyVO mediaBodyVO) {
         MediaDTO mediaDTO = new MediaDTO();
         String fileMD5 = mediaBodyVO.getMd5();
@@ -161,7 +172,7 @@ public class FileComponent {
         List<Integer> list = (List<Integer>) redisComponent.getFileInfoFromTemp(fileMD5).get("uploadedChunks");
         System.out.println(list);
         String url = mediaBodyVO.getMd5() + "." + mediaBodyVO.getName().substring(mediaBodyVO.getName().lastIndexOf(".") + 1);
-        mediaDTO.setSkip(list.size()==mediaBodyVO.getTotalChunks());
+        mediaDTO.setSkip(list.size() == mediaBodyVO.getTotalChunks());
         mediaDTO.setMediaUrl(url);
         mediaDTO.setUploadedChunks(list);
         mediaDTO.setUploadedChunkNum(list.size());
@@ -172,8 +183,18 @@ public class FileComponent {
             map.put("url", url);
         }
         redisComponent.setFileInfo2Temp(fileMD5, map);
+        //异步合并
+        if (currentChunk == (mediaBodyVO.getTotalChunks() - 1)) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    System.out.println("合并文件");
+                    String filename = fileMD5 + "." + mediaBodyVO.getName().substring(mediaBodyVO.getName().lastIndexOf(".") + 1);
+                    fileComponent.transferFile(fileMD5, filename, type, true);
+                }
+            });
+        }
         return mediaDTO;
-
     }
 
     public void chunk2RedisTemp(MediaBodyVO mediaBodyVO) {
@@ -257,5 +278,58 @@ public class FileComponent {
             file.mkdirs();
         }
         readFile(response, FULL_HEADER_IMAGE_PATH + DEFAULT_AVATAR);
+    }
+
+    @Async
+    public void transferFile(String fileMD5, String filename, String type, Boolean deleteSource) {
+        String tempName = type.equals(MediaType.VIDEO.getName()) ? TEMP_VIDEO_PATH : TEMP_IMAGE_PATH + "/" + fileMD5;
+        String targetName = type.equals(MediaType.VIDEO.getName()) ? FULL_VIDEO_PATH : FULL_POST_IMAGE_PATH + "/" + filename;
+        RandomAccessFile writeFile = null;
+        File file = new File(tempName);
+        if (!file.exists()) {
+            throw new BusinessException("文件不存在");
+        }
+        File[] files = file.listFiles();
+        File targetFile = new File(targetName);
+        try {
+            writeFile = new RandomAccessFile(targetFile, "rw");
+            byte[] bytes = new byte[1024 * 10];
+            for (int i = 0; i < files.length; i++) {
+                int len = -1;
+                File chunkFile = files[i];
+                RandomAccessFile readFile = null;
+                try {
+                    readFile = new RandomAccessFile(chunkFile, "r");
+                    while ((len = readFile.read(bytes)) != -1) {
+                        writeFile.write(bytes, 0, len);
+                    }
+                } catch (Exception e) {
+                    log.error("文件读取异常", e);
+                } finally {
+                    if (readFile != null) {
+                        readFile.close();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("文件写入异常", e);
+        } finally {
+            if (writeFile != null) {
+                try {
+                    writeFile.close();
+                } catch (IOException e) {
+                    log.error("文件关闭异常", e);
+                }
+            }
+            try {
+                if (deleteSource && file.exists()) {
+                    FileUtils.delete(file);
+                }
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        }
+        //删除redis中的数据
+//        redisComponent.deleteFileInfoFromTemp(fileMD5);
     }
 }

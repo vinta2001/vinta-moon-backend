@@ -74,4 +74,8 @@ public class RedisComponent {
     public Map<String, Object> getFileInfoFromTemp(String key) {
         return (Map<String, Object>) redisTemplate.opsForHash().get(fileTempTable, key);
     }
+
+    public Long deleteFileInfoFromTemp(String key) {
+        return redisTemplate.opsForHash().delete(fileTempTable, key);
+    }
 }

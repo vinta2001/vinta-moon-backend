@@ -11,6 +11,7 @@ import com.vinta.mapper.MediaInfoMapper;
 import com.vinta.utils.RandomUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
@@ -41,6 +42,7 @@ public class MediaInfoServiceImpl extends ServiceImpl<MediaInfoMapper, MediaInfo
     }
 
     @Override
+    @Transactional
     public int insertAll(PostBodyVO postBodyVO) {
         List<String> mediaList = postBodyVO.getMediaList();
         String type = postBodyVO.getType();
