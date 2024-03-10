@@ -12,7 +12,7 @@ import com.vinta.enums.StatusCode;
 import com.vinta.exception.BusinessException;
 import com.vinta.service.UserInfoService;
 import com.vinta.mapper.UserInfoMapper;
-import com.vinta.utils.FileComponent;
+import com.vinta.component.FileComponent;
 import com.vinta.utils.VerifyCodeUtil;
 import com.vinta.utils.JWTUtil;
 import com.vinta.utils.RandomUtil;
@@ -21,7 +21,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 
 /**
  * @author VINTA
@@ -38,6 +40,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     @Resource
     private UserInfoMapper userInfoMapper;
 
+
     @Resource
     private FileComponent fileComponent;
 
@@ -50,6 +53,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     private VerifyCodeUtil verifyCodeUtil;
 
     @Override
+    @Transactional
     public int register(HttpSession session, RegisterBodyVO registerBodyVO) {
 
         String attribute = (String)session.getAttribute(Constants.EMAIL_CODE);
@@ -71,6 +75,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         String userId = RandomUtil.getUUID();
         String username = RandomUtil.getRandomUsername();
         userInfo.setUserId(userId);
+        userInfo.setAvatar(fileComponent.getAvatarUrl(userId));
         userInfo.setUserNickname(RandomUtil.getRandomNickName());
         userInfo.setUserName(username);
         userInfo.setEmail(email);
@@ -79,6 +84,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
+    @Transactional
     public LoginResultDTO login(LoginBodyVO loginBodyVO, HttpServletResponse response) {
         String email = loginBodyVO.getEmail();
         String password = loginBodyVO.getPassword();
@@ -93,6 +99,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         }
         String token = jwtUtil.createToken(userInfo.getUserId(), null);
         response.setHeader("Authorization", token);
+        loginResultDTO.setToken(token);
         loginResultDTO.setId(userInfo.getUserId());
         loginResultDTO.setEmail(userInfo.getEmail());
         loginResultDTO.setUsername(userInfo.getUserName());
@@ -100,6 +107,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
+    @Transactional
     public int updatePassword(ResetPwdBodyVO resetPwdBodyVO) {
         String email = resetPwdBodyVO.getEmail();
         String newPassword = resetPwdBodyVO.getNewPassword();
@@ -117,12 +125,14 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
 
     @Override
+    @Transactional
     public UserInfo getUserByToken(String token) {
         String userId = jwtUtil.getUserId(token);
         return userInfoMapper.selectOne(queryWrapper().eq("user_id", userId));
     }
 
     @Override
+    @Transactional
     public int resetPassword(ResetPwdBodyVO resetPwdBodyVO) {
         String email = resetPwdBodyVO.getEmail();
         String newPassword = resetPwdBodyVO.getNewPassword();
@@ -135,35 +145,36 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
-    public int uploadProfile(String token, MultipartFile file) {
+    @Transactional
+    public int uploadAvatar(String token, MultipartFile file) {
         if (token == null) {
             throw new BusinessException(StatusCode.TOKEN_ERROR);
         }
         try {
             UserInfo userInfo = getUserByToken(token);
             String userId = userInfo.getUserId();
-            String upload = fileComponent.upload(userId, file);
-            userInfo.setProfile(upload);
+            String upload = fileComponent.uploadAvatar(userId, file);
+            userInfo.setAvatar(upload);
+            System.out.println(upload);
             return userInfoMapper.updateById(userInfo);
         } catch (Exception e) {
+            log.error(e.getMessage()+"上传头像异常");
             throw new BusinessException(StatusCode.UPLOAD_ERROR);
         }
     }
 
-    @Override
-    public int updateUserInfo(UserInfo userInfo) {
-        return userInfoMapper.updateById(userInfo);
-    }
 
     @Override
-    public void downloadProfile(String userId, HttpServletResponse response) {
+    @Transactional
+    public void downloadAvatar(String userId, HttpServletResponse response) {
         if (userId == null) {
             throw new BusinessException(StatusCode.BAD_REQUEST);
         }
-        fileComponent.getProfile(response, userId);
+        fileComponent.getAvatar(response, userId);
     }
 
     @Override
+    @Transactional
     public UserInfo getUserByUserId(String id) {
         return userInfoMapper.selectByUserId(id);
     }

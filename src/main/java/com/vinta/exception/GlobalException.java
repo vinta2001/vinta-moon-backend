@@ -6,6 +6,7 @@ import com.vinta.enums.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -35,5 +36,11 @@ public class GlobalException {
     public ResultDTO handler(HttpRequestMethodNotSupportedException e) {
         log.error(e.getMessage(), e);
         return ResultDTO.failed(StatusCode.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResultDTO handler(MethodArgumentNotValidException e) {
+        log.error(e.getMessage(), e);
+        return ResultDTO.failed(StatusCode.REQUEST_PARAM_ERROR);
     }
 }

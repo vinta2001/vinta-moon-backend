@@ -22,6 +22,7 @@ public enum StatusCode {
     VERIFY_CODE_ERROR(203, "验证码错误"),
     EMAIL_ERROR(203, "邮箱错误"),
     BAD_REQUEST(203, "请求错误"),
+    REQUEST_PARAM_ERROR(203,"请求参数错误" ),
 
     CODE_EXPIRED(204, "验证码已过期"),
     TOKEN_ERROR(204,"用户token失效"),

@@ -12,60 +12,23 @@ import lombok.Data;
  */
 @Data
 public class PostInfo implements Serializable {
-    /**
-     * 笔记id
-     */
+
     @TableId
     private String postId;
-
-    /**
-     * 作者id
-     */
     private String userId;
-
-    /**
-     * 笔记描述/标题
-     */
     private String description;
-
-    /**
-     * 笔记文字内容
-     */
     private String textContent;
-
-    /**
-     * 发布时间
-     */
     private Date postTime;
-
-    /**
-     * 作品评论数
-     */
     private Long commentsNum;
-
-    /**
-     * 作品点赞数
-     */
     private Long thumbNum;
-
-    /**
-     * 作品收藏数
-     */
     private Long collectNum;
-
-    /**
-     * 作品包含的音乐信息
-     */
     private String musicLink;
-
-    /**
-     * 作品的分类
-     */
     private Integer category;
-    /**
-     * 作品的分类
-     */
     private String tags;
+    private String location;
+    private Integer status;
+    private Date createTime;
+    private Integer access;
 
     private static final long serialVersionUID = 1L;
 
@@ -91,7 +54,11 @@ public class PostInfo implements Serializable {
             && (this.getCollectNum() == null ? other.getCollectNum() == null : this.getCollectNum().equals(other.getCollectNum()))
             && (this.getMusicLink() == null ? other.getMusicLink() == null : this.getMusicLink().equals(other.getMusicLink()))
             && (this.getCategory() == null ? other.getCategory() == null : this.getCategory().equals(other.getCategory()))
-            && (this.getTags() == null ? other.getTags() == null : this.getTags().equals(other.getTags()));
+            && (this.getTags() == null ? other.getTags() == null : this.getTags().equals(other.getTags()))
+            && (this.getLocation() == null ? other.getLocation() == null : this.getLocation().equals(other.getLocation()))
+            && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
+            && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
+            && (this.getAccess() == null ? other.getAccess() == null : this.getAccess().equals(other.getAccess()));
     }
 
     @Override
@@ -109,6 +76,10 @@ public class PostInfo implements Serializable {
         result = prime * result + ((getMusicLink() == null) ? 0 : getMusicLink().hashCode());
         result = prime * result + ((getCategory() == null) ? 0 : getCategory().hashCode());
         result = prime * result + ((getTags() == null) ? 0 : getTags().hashCode());
+        result = prime * result + ((getLocation() == null) ? 0 : getLocation().hashCode());
+        result = prime * result + ((getStatus() == null) ? 0 : getStatus().hashCode());
+        result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
+        result = prime * result + ((getAccess() == null) ? 0 : getAccess().hashCode());
         return result;
     }
 
@@ -130,6 +101,10 @@ public class PostInfo implements Serializable {
         sb.append(", category=").append(category);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append(", tags=").append(tags);
+        sb.append(", location=").append(location);
+        sb.append(", status=").append(status);
+        sb.append(", createTime=").append(createTime);
+        sb.append(", access=").append(access);
         sb.append("]");
         return sb.toString();
     }

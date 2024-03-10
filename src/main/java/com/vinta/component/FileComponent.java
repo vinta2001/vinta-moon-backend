@@ -1,18 +1,19 @@
-package com.vinta.utils;
+package com.vinta.component;
 
-import com.vinta.component.RedisComponent;
+import com.vinta.constant.Constants;
 import com.vinta.entity.dto.MediaDTO;
-import com.vinta.entity.po.MediaInfo;
 import com.vinta.entity.vo.MediaBodyVO;
 import com.vinta.enums.MediaType;
+import com.vinta.enums.StatusCode;
 import com.vinta.exception.BusinessException;
 
 import com.vinta.service.MediaInfoService;
+import com.vinta.utils.RandomUtil;
+import com.vinta.utils.StringUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Lazy;
@@ -32,25 +33,6 @@ import java.util.*;
 @ConfigurationProperties(prefix = "project.file")
 @Slf4j
 public class FileComponent {
-    private static final String ROOT_PATH = "D:/vintaMoon/file/";
-    private static final String VIDEO_PATH = "video/";
-    private static final String IMAGE_PATH = "image/";
-    private static final String AUDIO_PATH = "audio/";
-    private static final String POST_IMAGE_PATH = "post/";
-    private static final String HEADER_IMAGE_PATH = "header/";
-    private static final String TEMP_PATH = "temp/";
-
-    private static final String FULL_IMAGE_PATH = ROOT_PATH + IMAGE_PATH;
-    private static final String FULL_POST_IMAGE_PATH = FULL_IMAGE_PATH + POST_IMAGE_PATH;
-    private static final String FULL_HEADER_IMAGE_PATH = FULL_IMAGE_PATH + HEADER_IMAGE_PATH;
-    private static final String FULL_VIDEO_PATH = ROOT_PATH + VIDEO_PATH;
-    private static final String FULL_AUDIO_PATH = ROOT_PATH + AUDIO_PATH;
-
-    private static final String TEMP_IMAGE_PATH = FULL_IMAGE_PATH + TEMP_PATH;
-    private static final String TEMP_POST_IMAGE_PATH = FULL_POST_IMAGE_PATH + TEMP_PATH;
-    private static final String TEMP_HEADER_IMAGE_PATH = FULL_HEADER_IMAGE_PATH + TEMP_PATH;
-    private static final String TEMP_VIDEO_PATH = FULL_VIDEO_PATH + TEMP_PATH;
-    private static final String TEMP_AUDIO_PATH = FULL_AUDIO_PATH + TEMP_PATH;
 
     @Resource
     private MediaInfoService mediaInfoService;
@@ -62,17 +44,27 @@ public class FileComponent {
     @Lazy
     private FileComponent fileComponent;
 
+    public void getAvatar(HttpServletResponse response, String filename) {
+        if (StringUtil.hasContent(filename)) {
+            filename = Constants.FULL_HEADER_IMAGE_PATH + filename;
+            File file = new File(filename);
+            if (file.exists()) {
+                downloadAvatar(response, filename);
+            } else {
+                getDefaultAvatar(response);
+            }
+        } else {
+            getDefaultAvatar(response);
+        }
+    }
 
-    private static final String DEFAULT_AVATAR = "default_avatar.jpg";
-
-
-    public void getProfile(HttpServletResponse response, String userId) {
-        String filePath = FULL_HEADER_IMAGE_PATH + userId + ".jpg";
+    public String getAvatarUrl(String userId) {
+        String filePath = Constants.FULL_HEADER_IMAGE_PATH + userId + ".jpg";
         File file = new File(filePath);
         if (file.exists()) {
-            download(response, filePath);
+            return Constants.FULL_HEAD_PIC_URL + userId + ".jpg";
         } else {
-            getDefaultProfile(response);
+            return Constants.FULL_HEAD_PIC_URL + Constants.DEFAULT_AVATAR;
         }
     }
 
@@ -120,12 +112,12 @@ public class FileComponent {
         }
         String fileSuffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
         String filename = RandomUtil.getRandomFileName() + "." + fileSuffix;
-        File fileFolder = new File(FULL_IMAGE_PATH);
+        File fileFolder = new File(Constants.FULL_IMAGE_PATH);
         if (!fileFolder.exists()) {
             fileFolder.mkdirs();
         }
         //文件写入
-        File file2 = new File(FULL_IMAGE_PATH, filename);
+        File file2 = new File(Constants.FULL_IMAGE_PATH, filename);
         file.transferTo(file2);
         return filename;
     }
@@ -136,19 +128,23 @@ public class FileComponent {
         MediaDTO mediaDTO = new MediaDTO();
         String fileMD5 = mediaBodyVO.getMd5();
         String type = mediaBodyVO.getType();
+        String suffix = mediaBodyVO.getName().substring(mediaBodyVO.getName().lastIndexOf(".") + 1);
         Integer currentChunk = mediaBodyVO.getCurrentChunk();
         //查询第一个分片的md5值是否在mysql数据库中
         //如果在，说明已经上传过，直接返回
         if (currentChunk == 0) {
-            MediaInfo mediaInfo = mediaInfoService.selectByMd5(fileMD5);
+            //去文件夹查询是否已经上传过
+            String filename = type.equals(MediaType.VIDEO.getName()) ? Constants.FULL_VIDEO_PATH : Constants.FULL_VIDEO_PATH + mediaBodyVO.getName();
+            Boolean exist = isExist(filename);
             //已经上传过，直接返回文件地址
             //文件地址就是文件名称
-            if (mediaInfo != null) {
+            if (exist) {
+                String photoId = RandomUtil.getRandomFileName() + "." + suffix;
                 mediaDTO.setSkip(true);
-                mediaDTO.setMediaUrl(mediaInfo.getPhotoUrl());
+                mediaDTO.setMediaUrl(Constants.NOTE_PIC_URL + photoId);
                 mediaDTO.setUploadedChunks(null);
                 mediaDTO.setUploadedChunkNum(mediaBodyVO.getTotalChunks());
-                mediaDTO.setMediaMd5(mediaInfo.getMediaMd5());
+                mediaDTO.setMediaMd5(mediaBodyVO.getMd5());
                 mediaDTO.setTotalChunks(mediaBodyVO.getTotalChunks());
                 return mediaDTO;
             }
@@ -159,7 +155,7 @@ public class FileComponent {
                 mediaDTO.setUploadedChunks(chunkList);
                 mediaDTO.setSkip(chunkList.size() == mediaBodyVO.getTotalChunks());
                 mediaDTO.setMediaUrl((String) map.get("url"));
-                mediaDTO.setMediaMd5((String) map.get("mediaMd5"));
+                mediaDTO.setMediaMd5((String) map.get("filename"));
                 mediaDTO.setTotalChunks((Integer) map.get("totalChunks"));
                 return mediaDTO;
             }
@@ -170,31 +166,56 @@ public class FileComponent {
         //redis 缓存信息
         chunk2RedisTemp(mediaBodyVO);
         List<Integer> list = (List<Integer>) redisComponent.getFileInfoFromTemp(fileMD5).get("uploadedChunks");
-        System.out.println(list);
-        String url = mediaBodyVO.getMd5() + "." + mediaBodyVO.getName().substring(mediaBodyVO.getName().lastIndexOf(".") + 1);
         mediaDTO.setSkip(list.size() == mediaBodyVO.getTotalChunks());
-        mediaDTO.setMediaUrl(url);
         mediaDTO.setUploadedChunks(list);
         mediaDTO.setUploadedChunkNum(list.size());
         mediaDTO.setMediaMd5(mediaBodyVO.getMd5());
         mediaDTO.setTotalChunks(mediaBodyVO.getTotalChunks());
         Map<String, Object> map = redisComponent.getFileInfoFromTemp(fileMD5);
-        if (map != null) {
-            map.put("url", url);
-        }
+        String photoId = (String) map.get("photoId");
+        String url = photoId + "." + suffix;
+        url = Constants.NOTE_PIC_URL + url;
+        map.putIfAbsent("url", url);
+        mediaDTO.setMediaUrl(url);
         redisComponent.setFileInfo2Temp(fileMD5, map);
         //异步合并
         if (currentChunk == (mediaBodyVO.getTotalChunks() - 1)) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    System.out.println("合并文件");
-                    String filename = fileMD5 + "." + mediaBodyVO.getName().substring(mediaBodyVO.getName().lastIndexOf(".") + 1);
-                    fileComponent.transferFile(fileMD5, filename, type, true);
+                    String filename = fileMD5 + "." + suffix;
+                    fileComponent.transferFile(fileMD5, filename, type, false);
                 }
             });
         }
         return mediaDTO;
+    }
+
+    private Boolean isExist(String fileName) {
+        File file = new File(fileName);
+        return file.exists();
+    }
+
+    private Boolean deleteFolder(File file) {
+        if (!file.exists()) {
+            log.error(file.getName() + "不存在");
+            return false;
+        }
+        try {
+            File[] subFiles = file.listFiles();
+            assert subFiles != null;
+            for (File f : subFiles) {
+                if (f.isDirectory()) {
+                    deleteFolder(f);
+                }
+                boolean res = f.delete();
+                System.out.println(f.getName() + "删除" + (res ? "成功" : "失败"));
+            }
+            return file.delete();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     public void chunk2RedisTemp(MediaBodyVO mediaBodyVO) {
@@ -202,6 +223,7 @@ public class FileComponent {
         assert file.getOriginalFilename() != null;
         String suffix = mediaBodyVO.getName().substring(mediaBodyVO.getName().lastIndexOf(".") + 1);
         String fileMD5 = mediaBodyVO.getMd5();
+        String photoId = RandomUtil.getRandomFileName();
         String filename = fileMD5 + "." + suffix;
         Integer currentChunk = mediaBodyVO.getCurrentChunk();
         List<Integer> list = null;
@@ -220,9 +242,9 @@ public class FileComponent {
         map.put("type", mediaBodyVO.getType());
         map.put("uploadedChunkNum", list.size());
         map.put("currentChunkSize", mediaBodyVO.getCurrentChunkSize());
+        map.put("photoId", photoId);
         redisComponent.setFileInfo2Temp(fileMD5, map);
     }
-
 
     public void chunk2MediaTemp(MediaBodyVO mediaBodyVO) {
         String type = mediaBodyVO.getType();
@@ -231,8 +253,6 @@ public class FileComponent {
         if (!file.exists()) {
             file.mkdirs();
         }
-        // TODO
-        //  1.将文件存放在临时文件夹 file/media?/temp/md5中
         try {
             multipartFile.transferTo(file);
         } catch (Exception e) {
@@ -243,7 +263,7 @@ public class FileComponent {
 
     private File getFile(MediaBodyVO mediaBodyVO, MultipartFile multipartFile, String type) {
         assert multipartFile.getOriginalFilename() != null;
-        String tempPath = type.equals(MediaType.VIDEO.getName()) ? TEMP_VIDEO_PATH : TEMP_IMAGE_PATH;
+        String tempPath = type.equals(MediaType.VIDEO.getName()) ? Constants.TEMP_VIDEO_PATH : Constants.TEMP_IMAGE_PATH;
         File fileFolder = new File(tempPath);
         if (!fileFolder.exists()) {
             fileFolder.mkdirs();
@@ -252,38 +272,44 @@ public class FileComponent {
         return new File(filename);
     }
 
-    public String upload(String userId, MultipartFile file) throws IOException {
+    public String uploadAvatar(String userId, MultipartFile file) throws IOException {
         if (file == null) {
             throw new BusinessException("文件不存在");
         }
-        String fileSuffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+        String fileSuffix = "jpg";
         String filename = userId + "." + fileSuffix;
-        File fileFolder = new File(FULL_HEADER_IMAGE_PATH);
+        File fileFolder = new File(Constants.FULL_HEADER_IMAGE_PATH);
         if (!fileFolder.exists()) {
             fileFolder.mkdirs();
         }
         //文件写入
-        File file2 = new File(FULL_HEADER_IMAGE_PATH, filename);
+        File file2 = new File(Constants.FULL_HEADER_IMAGE_PATH, filename);
         file.transferTo(file2);
-        return filename;
+        return Constants.HEAD_PIC_URL + filename;
     }
 
-    public void download(HttpServletResponse response, String filePath) {
-        readFile(response, filePath);
+    public void download(HttpServletResponse response, String filename) {
+        if (filename.split("\\.").length == 1) {
+            filename = filename + ".jpg";
+        }
+        readFile(response, filename);
+    }
+    public void downloadAvatar(HttpServletResponse response, String filename) {
+        readFile(response, filename);
     }
 
-    public void getDefaultProfile(HttpServletResponse response) {
-        File file = new File(FULL_HEADER_IMAGE_PATH);
+    public void getDefaultAvatar(HttpServletResponse response) {
+        File file = new File(Constants.FULL_HEADER_IMAGE_PATH);
         if (!file.exists()) {
             file.mkdirs();
         }
-        readFile(response, FULL_HEADER_IMAGE_PATH + DEFAULT_AVATAR);
+        readFile(response, Constants.FULL_HEADER_IMAGE_PATH + Constants.DEFAULT_AVATAR);
     }
 
     @Async
     public void transferFile(String fileMD5, String filename, String type, Boolean deleteSource) {
-        String tempName = type.equals(MediaType.VIDEO.getName()) ? TEMP_VIDEO_PATH : TEMP_IMAGE_PATH + "/" + fileMD5;
-        String targetName = type.equals(MediaType.VIDEO.getName()) ? FULL_VIDEO_PATH : FULL_POST_IMAGE_PATH + "/" + filename;
+        String tempName = type.equals(MediaType.VIDEO.getName()) ? Constants.TEMP_VIDEO_PATH : Constants.TEMP_IMAGE_PATH + "/" + fileMD5;
+        String targetName = type.equals(MediaType.VIDEO.getName()) ? Constants.FULL_VIDEO_PATH : Constants.FULL_POST_IMAGE_PATH + "/" + filename;
         RandomAccessFile writeFile = null;
         File file = new File(tempName);
         if (!file.exists()) {
@@ -321,15 +347,20 @@ public class FileComponent {
                     log.error("文件关闭异常", e);
                 }
             }
-            try {
-                if (deleteSource && file.exists()) {
-                    FileUtils.delete(file);
-                }
-            } catch (IOException e) {
-                log.error(e.getMessage());
+            if (deleteSource && file.exists()) {
+                deleteFolder(file);
             }
         }
-        //删除redis中的数据
-//        redisComponent.deleteFileInfoFromTemp(fileMD5);
+
+    }
+
+    public void getPostPicture(String filename, HttpServletResponse response) {
+        if (StringUtil.isEmpty(filename)) {
+            throw new BusinessException(StatusCode.BAD_REQUEST);
+        }
+        filename = filename.split("\\.")[0];
+        String mediaMd5 = mediaInfoService.getMediaMd5ByPhotoId(filename);
+        filename = Constants.FULL_POST_IMAGE_PATH + mediaMd5;
+        download(response, filename);
     }
 }

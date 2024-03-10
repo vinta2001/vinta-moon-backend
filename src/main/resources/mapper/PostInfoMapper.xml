@@ -5,23 +5,28 @@
 <mapper namespace="com.vinta.mapper.PostInfoMapper">
 
     <resultMap id="BaseResultMap" type="com.vinta.entity.po.PostInfo">
-            <id property="postId" column="post_id" jdbcType="VARCHAR"/>
-            <result property="userId" column="user_id" jdbcType="VARCHAR"/>
-            <result property="description" column="description" jdbcType="VARCHAR"/>
-            <result property="textContent" column="text_content" jdbcType="VARCHAR"/>
-            <result property="postTime" column="post_time" jdbcType="TIMESTAMP"/>
-            <result property="commentsNum" column="comments_num" jdbcType="BIGINT"/>
-            <result property="thumbNum" column="thumb_num" jdbcType="BIGINT"/>
-            <result property="collectNum" column="collect_num" jdbcType="BIGINT"/>
-            <result property="musicLink" column="music_link" jdbcType="VARCHAR"/>
-            <result property="category" column="category" jdbcType="TINYINT"/>
-            <result property="tags" column="tags" jdbcType="VARCHAR"/>
+        <id property="postId" column="post_id" jdbcType="VARCHAR"/>
+        <result property="userId" column="user_id" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+        <result property="textContent" column="text_content" jdbcType="VARCHAR"/>
+        <result property="postTime" column="post_time" jdbcType="TIMESTAMP"/>
+        <result property="commentsNum" column="comments_num" jdbcType="BIGINT"/>
+        <result property="thumbNum" column="thumb_num" jdbcType="BIGINT"/>
+        <result property="collectNum" column="collect_num" jdbcType="BIGINT"/>
+        <result property="musicLink" column="music_link" jdbcType="VARCHAR"/>
+        <result property="category" column="category" jdbcType="TINYINT"/>
+        <result property="tags" column="tags" jdbcType="VARCHAR"/>
+        <result property="location" column="location" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="access" column="access" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        post_id,user_id,description,
+        post_id
+        ,user_id,description,
         text_content,post_time,comments_num,
         thumb_num,collect_num,music_link,
-        category,tags
+        category,tags,location,status,create_time,access
     </sql>
 </mapper>

@@ -15,5 +15,5 @@ public class PaginationResultDTO<T> {
     private String category;
     private String searchKey;
     private String cursorScore;
-    private List<T> datas = new ArrayList <T>();
+    private List<T> data = new ArrayList <T>();
 }

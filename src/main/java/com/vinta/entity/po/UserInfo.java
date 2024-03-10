@@ -2,6 +2,8 @@ package com.vinta.entity.po;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
@@ -13,6 +15,7 @@ public class UserInfo implements Serializable {
     /**
      * 用户唯一id
      */
+    @TableId(value = "user_id")
     private String userId;
 
     /**
@@ -78,7 +81,7 @@ public class UserInfo implements Serializable {
     /**
      * 头像链接
      */
-    private String head;
+    private String avatar;
 
     /**
      * 用户的粉丝
@@ -127,7 +130,7 @@ public class UserInfo implements Serializable {
             && (this.getSchool() == null ? other.getSchool() == null : this.getSchool().equals(other.getSchool()))
             && (this.getProfile() == null ? other.getProfile() == null : this.getProfile().equals(other.getProfile()))
             && (this.getLevel() == null ? other.getLevel() == null : this.getLevel().equals(other.getLevel()))
-            && (this.getHead() == null ? other.getHead() == null : this.getHead().equals(other.getHead()))
+            && (this.getAvatar() == null ? other.getAvatar() == null : this.getAvatar().equals(other.getAvatar()))
             && (this.getFollower() == null ? other.getFollower() == null : this.getFollower().equals(other.getFollower()))
             && (this.getFollow() == null ? other.getFollow() == null : this.getFollow().equals(other.getFollow()))
             && (this.getGreat() == null ? other.getGreat() == null : this.getGreat().equals(other.getGreat()))
@@ -151,7 +154,7 @@ public class UserInfo implements Serializable {
         result = prime * result + ((getSchool() == null) ? 0 : getSchool().hashCode());
         result = prime * result + ((getProfile() == null) ? 0 : getProfile().hashCode());
         result = prime * result + ((getLevel() == null) ? 0 : getLevel().hashCode());
-        result = prime * result + ((getHead() == null) ? 0 : getHead().hashCode());
+        result = prime * result + ((getAvatar() == null) ? 0 : getAvatar().hashCode());
         result = prime * result + ((getFollower() == null) ? 0 : getFollower().hashCode());
         result = prime * result + ((getFollow() == null) ? 0 : getFollow().hashCode());
         result = prime * result + ((getGreat() == null) ? 0 : getGreat().hashCode());
@@ -178,7 +181,7 @@ public class UserInfo implements Serializable {
         sb.append(", school=").append(school);
         sb.append(", profile=").append(profile);
         sb.append(", level=").append(level);
-        sb.append(", head=").append(head);
+        sb.append(", avatar=").append(avatar);
         sb.append(", follower=").append(follower);
         sb.append(", follow=").append(follow);
         sb.append(", great=").append(great);

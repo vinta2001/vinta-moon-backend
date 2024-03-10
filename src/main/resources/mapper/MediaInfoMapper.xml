@@ -5,24 +5,31 @@
 <mapper namespace="com.vinta.mapper.MediaInfoMapper">
 
     <resultMap id="BaseResultMap" type="com.vinta.entity.po.MediaInfo">
-            <id property="photoId" column="photo_id" jdbcType="VARCHAR"/>
-            <id property="postId" column="post_id" jdbcType="VARCHAR"/>
-            <result property="userId" column="user_id" jdbcType="VARCHAR"/>
-            <result property="photoUrl" column="photo_url" jdbcType="VARCHAR"/>
-            <result property="postTime" column="post_time" jdbcType="TIMESTAMP"/>
-            <result property="mediaType" column="media_type" jdbcType="TINYINT"/>
-            <result property="mediaMd5" column="media_md5" jdbcType="VARCHAR"/>
+        <id property="photoId" column="photo_id" jdbcType="VARCHAR"/>
+        <result property="postId" column="post_id" jdbcType="VARCHAR"/>
+        <result property="userId" column="user_id" jdbcType="VARCHAR"/>
+        <result property="photoUrl" column="photo_url" jdbcType="VARCHAR"/>
+        <result property="postTime" column="post_time" jdbcType="TIMESTAMP"/>
+        <result property="mediaType" column="media_type" jdbcType="TINYINT"/>
+        <result property="mediaMd5" column="media_md5" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="access" column="access" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        photo_id,post_id,user_id,
+        photo_id,
+        post_id,user_id,
         photo_url,post_time,media_type,
-        media_md5
+        media_md5,status,access
     </sql>
     <select id="selectMediaByPostId" resultType="string">
-        select photo_url from media_info where post_id = #{postId}
+        select photo_url
+        from media_info
+        where post_id = #{postId}
     </select>
     <select id="selectByUrl" resultType="com.vinta.entity.po.MediaInfo">
-        select * from media_info where photo_url = #{url}
+        select *
+        from media_info
+        where photo_url = #{url}
     </select>
 </mapper>

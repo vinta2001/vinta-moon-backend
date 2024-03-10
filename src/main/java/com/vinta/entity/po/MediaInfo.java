@@ -7,47 +7,29 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
- * 
+ *
  * @TableName media_info
  */
 @Data
 public class MediaInfo implements Serializable {
-    /**
-     * 图片的id
-     */
-    @TableId
-    private String photoId;
 
-    /**
-     * 作品的id
-     */
 
     private String postId;
+    @TableId(value = "photo_id")
+    private String photoId;
 
-    /**
-     * 发布用户的id
-     */
     private String userId;
 
-    /**
-     * 图片保存地址
-     */
     private String photoUrl;
 
-    /**
-     * 创建时间
-     */
     private Date postTime;
 
-    /**
-     * 媒体类型：0 图片  1 视频
-     */
     private Integer mediaType;
 
-    /**
-     * 文件的md5值
-     */
     private String mediaMd5;
+
+    private Integer status;
+    private Integer access;
 
     private static final long serialVersionUID = 1L;
 
@@ -69,7 +51,9 @@ public class MediaInfo implements Serializable {
             && (this.getPhotoUrl() == null ? other.getPhotoUrl() == null : this.getPhotoUrl().equals(other.getPhotoUrl()))
             && (this.getPostTime() == null ? other.getPostTime() == null : this.getPostTime().equals(other.getPostTime()))
             && (this.getMediaType() == null ? other.getMediaType() == null : this.getMediaType().equals(other.getMediaType()))
-            && (this.getMediaMd5() == null ? other.getMediaMd5() == null : this.getMediaMd5().equals(other.getMediaMd5()));
+            && (this.getMediaMd5() == null ? other.getMediaMd5() == null : this.getMediaMd5().equals(other.getMediaMd5()))
+            && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
+            && (this.getAccess() == null ? other.getAccess() == null : this.getAccess().equals(other.getAccess()));
     }
 
     @Override
@@ -83,6 +67,8 @@ public class MediaInfo implements Serializable {
         result = prime * result + ((getPostTime() == null) ? 0 : getPostTime().hashCode());
         result = prime * result + ((getMediaType() == null) ? 0 : getMediaType().hashCode());
         result = prime * result + ((getMediaMd5() == null) ? 0 : getMediaMd5().hashCode());
+        result = prime * result + ((getStatus() == null) ? 0 : getStatus().hashCode());
+        result = prime * result + ((getAccess() == null) ? 0 : getAccess().hashCode());
         return result;
     }
 
@@ -100,6 +86,8 @@ public class MediaInfo implements Serializable {
         sb.append(", mediaType=").append(mediaType);
         sb.append(", mediaMd5=").append(mediaMd5);
         sb.append(", serialVersionUID=").append(serialVersionUID);
+        sb.append(", status=").append(status);
+        sb.append(", access=").append(access);
         sb.append("]");
         return sb.toString();
     }

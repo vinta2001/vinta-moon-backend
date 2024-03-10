@@ -18,7 +18,7 @@
             <result property="school" column="school" jdbcType="VARCHAR"/>
             <result property="profile" column="profile" jdbcType="VARCHAR"/>
             <result property="level" column="level" jdbcType="TINYINT"/>
-            <result property="head" column="head" jdbcType="VARCHAR"/>
+            <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
             <result property="follower" column="follower" jdbcType="BIGINT"/>
             <result property="follow" column="follow" jdbcType="BIGINT"/>
             <result property="great" column="great" jdbcType="BIGINT"/>
@@ -30,7 +30,7 @@
         user_nickname,password,description,
         gender,birthday,region,
         career,school,profile,
-        level,head,follower,
+        level,avatar,follower,
         follow,great,last_login_time
     </sql>
     <select id="login" resultType="com.vinta.entity.po.UserInfo">
