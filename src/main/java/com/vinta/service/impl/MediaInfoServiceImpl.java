@@ -44,11 +44,6 @@ public class MediaInfoServiceImpl extends ServiceImpl<MediaInfoMapper, MediaInfo
 
 
     @Override
-    public MediaInfo selectByMd5(String md5) {
-        return mediaInfoMapper.selectOne(new QueryWrapper<MediaInfo>().eq("media_md5", md5));
-    }
-
-    @Override
     @Transactional
     public int insertAll(PostBodyVO postBodyVO) {
         List<MediaInNoteVO> mediaList = postBodyVO.getMediaList();
