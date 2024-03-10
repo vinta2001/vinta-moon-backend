@@ -27,11 +27,10 @@ public interface UserInfoService extends IService<UserInfo> {
 
     int resetPassword(ResetPwdBodyVO resetPwdBodyVO);
 
-    int uploadProfile(String token, MultipartFile file);
+    int uploadAvatar(String token, MultipartFile file);
 
-    int updateUserInfo(UserInfo userInfo);
 
-    void downloadProfile(String token, HttpServletResponse response);
+    void downloadAvatar(String userId, HttpServletResponse response);
 
     UserInfo getUserByUserId(String id);
 }

@@ -7,9 +7,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.vinta.entity.po.PostInfo;
 import com.vinta.entity.vo.PaginationBodyVO;
 import com.vinta.entity.vo.PostBodyVO;
+import com.vinta.enums.MediaAccess;
+import com.vinta.enums.MediaStatus;
 import com.vinta.service.PostInfoService;
 import com.vinta.mapper.PostInfoMapper;
 import com.vinta.utils.RandomUtil;
+import com.vinta.utils.StringUtil;
+import io.lettuce.core.ScriptOutputType;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author VINTA
@@ -36,16 +41,17 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo>
         return new QueryWrapper<>();
     }
 
-
     @Override
+    @Transactional
     public IPage<PostInfo> findPostListByQuery(PaginationBodyVO paginationBodyVO) {
         IPage<PostInfo> postInfoIPage = new Page<>(paginationBodyVO.getPageNum(), paginationBodyVO.getPageSize());
         QueryWrapper<PostInfo> wrapper = postInfoQueryWrapper()
-                .eq(paginationBodyVO.getCategory() != null, "category", paginationBodyVO.getCategory())
-                .eq(paginationBodyVO.getUserId() != null, "user_id", paginationBodyVO.getUserId())
-                .like(paginationBodyVO.getSearchKey() != null, "description", paginationBodyVO.getSearchKey());
-        postInfoMapper.selectPage(postInfoIPage, wrapper);
-        return postInfoIPage;
+                .eq( "status",MediaStatus.PUBLISHED.getStatus())
+                .eq( "access", MediaAccess.PUBLIC.getAccess())
+                .eq(StringUtil.hasContent(paginationBodyVO.getCategory()), "category", paginationBodyVO.getCategory())
+                .eq(StringUtil.hasContent(paginationBodyVO.getUserId()), "user_id", paginationBodyVO.getUserId())
+                .like(StringUtil.hasContent(paginationBodyVO.getSearchKey()), "description", paginationBodyVO.getSearchKey());
+        return postInfoMapper.selectPage(postInfoIPage, wrapper);
     }
 
     @Override
@@ -60,9 +66,20 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo>
         postInfo.setCommentsNum(0L);
         postInfo.setThumbNum(0L);
         postInfo.setCollectNum(0L);
-        postInfo.setPostTime(postBodyVO.getCreateTime());
+        postInfo.setPostTime(new Date(postBodyVO.getPostTime()));
         postInfo.setTags(String.join(",", postBodyVO.getTagList()));
-        //todo 添加分类
+        postInfo.setCreateTime(new Date(postBodyVO.getCreateTime()));
+        postInfo.setLocation(postBodyVO.getLocation());
+        if (postBodyVO.getStatus().equals(MediaStatus.SCHEDULED.getStatus())) {
+            postInfo.setStatus(MediaStatus.SCHEDULED.getStatus());
+            //todo 定时发布
+        }else if(postBodyVO.getStatus().equals(MediaStatus.PUBLISHED.getStatus())) {
+            postInfo.setStatus(MediaStatus.PUBLISHED.getStatus());
+        }else if(postBodyVO.getStatus().equals(MediaStatus.DRAFT.getStatus())) {
+            postInfo.setStatus(MediaStatus.DRAFT.getStatus());
+            //todo 做草稿缓存
+        }
+        postInfo.setAccess(MediaAccess.getAccessByDesc(postBodyVO.getAccess()));
         return postInfoMapper.insert(postInfo);
     }
 }

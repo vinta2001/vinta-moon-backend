@@ -8,4 +8,5 @@ public class LoginResultDTO {
     private String id;
     private String username;
     private String email;
+    private String token;
 }

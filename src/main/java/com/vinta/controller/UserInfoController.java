@@ -1,5 +1,6 @@
 package com.vinta.controller;
 
+import com.vinta.annotation.UserLoginRequired;
 import com.vinta.constant.Constants;
 import com.vinta.entity.vo.LoginBodyVO;
 import com.vinta.entity.vo.RegisterBodyVO;
@@ -48,6 +49,7 @@ public class UserInfoController {
 
     @GetMapping("/logout")
     @Operation(summary = "用户退出")
+    @UserLoginRequired
     public ResultDTO logout(HttpSession session, HttpServletResponse response) {
         response.reset();
         session.removeAttribute(Constants.USER_TOKEN_KEY);
@@ -57,6 +59,7 @@ public class UserInfoController {
     @PostMapping("/update")
     @Operation(summary = "更换密码")
     @Parameter(name = "resetPwdRequest", description = "请求体", required = true)
+    @UserLoginRequired
     public ResultDTO updatePassword(@RequestBody ResetPwdBodyVO resetPwdBodyVO) {
         int updatePassword = userInfoService.updatePassword(resetPwdBodyVO);
         return updatePassword == 1 ? ResultDTO.success(StatusCode.UPDATE_SUCCESS) : ResultDTO.failed(StatusCode.UPDATE_ERROR);
@@ -64,6 +67,7 @@ public class UserInfoController {
 
     @PostMapping("/reset")
     @Operation(summary = "找回密码")
+    @UserLoginRequired
     @Parameter(name = "resetPwdRequest", description = "resetPwdRequest", required = true)
     public ResultDTO restPassword(@RequestBody ResetPwdBodyVO resetPwdBodyVO) {
         int reset = userInfoService.resetPassword(resetPwdBodyVO);
@@ -71,19 +75,20 @@ public class UserInfoController {
     }
 
     @PostMapping("/avatar/upload")
+    @UserLoginRequired
     @Operation(summary = "上传头像")
     @Parameter(name = "file", description = "文件", required = true)
-    public ResultDTO uploadProfile(@NotBlank @RequestHeader("Authorization") String Authorization,
+    public ResultDTO uploadAvatar(@NotBlank @RequestHeader("Authorization") String Authorization,
                                    @NotBlank MultipartFile file) {
-        int i = userInfoService.uploadProfile(Authorization, file);
+        int i = userInfoService.uploadAvatar(Authorization, file);
         return i == 1 ? ResultDTO.success(StatusCode.UPLOAD_SUCCESS) : ResultDTO.failed(StatusCode.UPLOAD_ERROR);
     }
 
     @GetMapping("/avatar/download/{userId}")
     @Operation(summary = "下载头像")
-    public void downloadProfile(@NotBlank @PathVariable String userId,
+    public void downloadAvatar(@NotBlank @PathVariable String userId,
                                 HttpServletResponse response) {
-        userInfoService.downloadProfile(userId, response);
+        userInfoService.downloadAvatar(userId, response);
     }
 }
 

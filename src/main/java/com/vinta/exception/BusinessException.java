@@ -2,9 +2,9 @@ package com.vinta.exception;
 
 
 import com.vinta.enums.StatusCode;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class BusinessException extends RuntimeException {
     private final Integer code;
     private final String message;

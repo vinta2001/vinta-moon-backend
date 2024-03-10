@@ -5,11 +5,12 @@ import com.vinta.entity.dto.ResultDTO;
 import com.vinta.entity.vo.MediaBodyVO;
 import com.vinta.enums.StatusCode;
 import com.vinta.exception.BusinessException;
-import com.vinta.utils.FileComponent;
+import com.vinta.component.FileComponent;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,7 +45,7 @@ public class FileController {
         mediaBodyVO.setName(name);
         try {
             MediaDTO mediaDTO = fileComponent.upload2Temp(mediaBodyVO);
-            if(mediaDTO == null){
+            if (mediaDTO == null) {
                 return ResultDTO.success(StatusCode.UPLOAD_SUCCESS);
             }
             return ResultDTO.ok(mediaDTO);
@@ -68,5 +69,15 @@ public class FileController {
             log.error("文件上传失败", e);
             throw new BusinessException(StatusCode.UPLOAD_ERROR);
         }
+    }
+
+    @GetMapping("/pic/download/{filename}")
+    @Operation(summary = "下载笔记图片",
+            parameters = {
+                    @Parameter(name = "filename", description = "文件名", required = true)
+            })
+    public void downloadPic(@PathVariable String filename,
+                            HttpServletResponse response) {
+        fileComponent.getPostPicture(filename, response);
     }
 }

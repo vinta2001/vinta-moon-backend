@@ -17,9 +17,7 @@ import java.util.Map;
 @Data
 public class JWTUtil {
     private final String secret = "737844829@qq.com!!";
-
     private final Duration expireTime = Duration.ofMinutes(60);
-
 
     /**
      * 生成token
