@@ -49,7 +49,7 @@ public class PostController {
     public ResultDTO uploadPost(@Valid @RequestBody PostBodyVO postBodyVO) {
         int post = postInfoService.insertOne(postBodyVO);
         int media = mediaInfoService.insertAll(postBodyVO);
-        return post == 1 && media!=0 ? ResultDTO.success(StatusCode.UPLOAD_SUCCESS) : ResultDTO.failed(StatusCode.UPLOAD_ERROR);
+        return post == 1 && media != 0 ? ResultDTO.success(StatusCode.UPLOAD_SUCCESS) : ResultDTO.failed(StatusCode.UPLOAD_ERROR);
     }
 
     private PaginationResultDTO<PostResultVO> getResultVOPaginationResultDTO(PaginationBodyVO paginationBodyVO, IPage<PostInfo> postInfoIPage, List<PostResultVO> postResultVOS) {
@@ -75,7 +75,7 @@ public class PostController {
         postResultVO.setUser(user);
         String postId = postInfo.getPostId();
         List<String> mediaUrl = mediaInfoService.getMediaByPostId(postId);
-        for(int i = 0; i < mediaUrl.size(); i++) {
+        for (int i = 0; i < mediaUrl.size(); i++) {
             mediaUrl.set(i, Constants.HOST + mediaUrl.get(i));
         }
         postResultVO.setId(postId);
@@ -88,6 +88,8 @@ public class PostController {
         postResultVO.setLocation(postInfo.getLocation());
         // todo 需要对数据表中的like进行设置，默认为false
         postResultVO.setLike(false);
+//        log.info("postid: {}",postId);
+//        log.info("mediaUrl: {}", mediaUrl);
         postResultVO.setCover(mediaUrl.get(0));
         postResultVO.setMediaUrl(mediaUrl);
         return postResultVO;

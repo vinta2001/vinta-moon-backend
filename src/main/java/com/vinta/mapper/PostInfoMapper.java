@@ -2,6 +2,7 @@ package com.vinta.mapper;
 
 import com.vinta.entity.po.PostInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Update;
 
 /**
 * @author VINTA
@@ -11,6 +12,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface PostInfoMapper extends BaseMapper<PostInfo> {
 
+    @Update("update post_info set status = 1 where post_id = #{postId}")
+    void updateStatusById(String postId);
 }
 
 

@@ -128,18 +128,18 @@ public class FileComponent {
         MediaDTO mediaDTO = new MediaDTO();
         String fileMD5 = mediaBodyVO.getMd5();
         String type = mediaBodyVO.getType();
-        String suffix = mediaBodyVO.getName().substring(mediaBodyVO.getName().lastIndexOf(".") + 1);
+        String suffix = mediaBodyVO.getName().substring(mediaBodyVO.getName().lastIndexOf("."));
         Integer currentChunk = mediaBodyVO.getCurrentChunk();
         //查询第一个分片的md5值是否在mysql数据库中
         //如果在，说明已经上传过，直接返回
         if (currentChunk == 0) {
             //去文件夹查询是否已经上传过
-            String filename = type.equals(MediaType.VIDEO.getName()) ? Constants.FULL_VIDEO_PATH : Constants.FULL_VIDEO_PATH + mediaBodyVO.getName();
+            String filename = (type.equals(MediaType.VIDEO.getName()) ? Constants.FULL_VIDEO_PATH : Constants.FULL_POST_IMAGE_PATH )+ mediaBodyVO.getMd5() + suffix;
             Boolean exist = isExist(filename);
             //已经上传过，直接返回文件地址
             //文件地址就是文件名称
             if (exist) {
-                String photoId = RandomUtil.getRandomFileName() + "." + suffix;
+                String photoId = RandomUtil.getRandomFileName() + suffix;
                 mediaDTO.setSkip(true);
                 mediaDTO.setMediaUrl(Constants.NOTE_PIC_URL + photoId);
                 mediaDTO.setUploadedChunks(null);
@@ -173,7 +173,7 @@ public class FileComponent {
         mediaDTO.setTotalChunks(mediaBodyVO.getTotalChunks());
         Map<String, Object> map = redisComponent.getFileInfoFromTemp(fileMD5);
         String photoId = (String) map.get("photoId");
-        String url = photoId + "." + suffix;
+        String url = photoId + suffix;
         url = Constants.NOTE_PIC_URL + url;
         map.putIfAbsent("url", url);
         mediaDTO.setMediaUrl(url);
@@ -183,7 +183,7 @@ public class FileComponent {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    String filename = fileMD5 + "." + suffix;
+                    String filename = fileMD5 + suffix;
                     fileComponent.transferFile(fileMD5, filename, type, false);
                 }
             });
@@ -224,7 +224,7 @@ public class FileComponent {
         String suffix = mediaBodyVO.getName().substring(mediaBodyVO.getName().lastIndexOf(".") + 1);
         String fileMD5 = mediaBodyVO.getMd5();
         String photoId = RandomUtil.getRandomFileName();
-        String filename = fileMD5 + "." + suffix;
+        String filename = fileMD5 + suffix;
         Integer currentChunk = mediaBodyVO.getCurrentChunk();
         List<Integer> list = null;
         Map<String, Object> fileInfoFromTemp = redisComponent.getFileInfoFromTemp(fileMD5);
@@ -289,9 +289,6 @@ public class FileComponent {
     }
 
     public void download(HttpServletResponse response, String filename) {
-        if (filename.split("\\.").length == 1) {
-            filename = filename + ".jpg";
-        }
         readFile(response, filename);
     }
     public void downloadAvatar(HttpServletResponse response, String filename) {
@@ -321,7 +318,7 @@ public class FileComponent {
             writeFile = new RandomAccessFile(targetFile, "rw");
             byte[] bytes = new byte[1024 * 10];
             for (int i = 0; i < files.length; i++) {
-                int len = -1;
+                int len;
                 File chunkFile = files[i];
                 RandomAccessFile readFile = null;
                 try {
@@ -351,16 +348,16 @@ public class FileComponent {
                 deleteFolder(file);
             }
         }
-
     }
 
     public void getPostPicture(String filename, HttpServletResponse response) {
         if (StringUtil.isEmpty(filename)) {
             throw new BusinessException(StatusCode.BAD_REQUEST);
         }
-        filename = filename.split("\\.")[0];
-        String mediaMd5 = mediaInfoService.getMediaMd5ByPhotoId(filename);
-        filename = Constants.FULL_POST_IMAGE_PATH + mediaMd5;
+        String filenameWithoutSuffix = filename.split("\\.")[0];
+        String suffix = filename.substring(filename.lastIndexOf("."));
+        String mediaMd5 = mediaInfoService.getMediaMd5ByPhotoId(filenameWithoutSuffix);
+        filename = Constants.FULL_POST_IMAGE_PATH + mediaMd5+suffix;
         download(response, filename);
     }
 }

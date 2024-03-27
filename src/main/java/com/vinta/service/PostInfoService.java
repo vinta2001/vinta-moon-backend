@@ -16,4 +16,6 @@ public interface PostInfoService extends IService<PostInfo> {
     IPage<PostInfo> findPostListByQuery(PaginationBodyVO paginationBodyVO);
 
     int insertOne(PostBodyVO postbodyvo);
+
+    void updateStatusById(String postId);
 }
