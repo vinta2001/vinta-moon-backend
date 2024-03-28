@@ -41,6 +41,9 @@ public class ResultDTO<T> {
     public static <T> ResultDTO<T> ok(T data) {
         return build(data, StatusCode.OK);
     }
+    public static <T> ResultDTO<T> ok() {
+        return build(null, StatusCode.OK);
+    }
 
     public static <T> ResultDTO<T> success(StatusCode statusCode) {
         return build(null, statusCode);

@@ -39,6 +39,9 @@ public class Constants {
     public static final String FULL_NOTE_PIC_URL = HOST + NOTE_PIC_URL;
     public static final String FULL_HEAD_PIC_URL = HOST + HEAD_PIC_URL;
 
+    public static final String THUMB_UP_SUCCESS = "点赞成功";
+    public static final String THUMB_CANCEL_SUCCESS = "取消成功";
+
 
 
 }

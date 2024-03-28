@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultType;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -23,6 +24,10 @@ public interface MediaInfoMapper extends BaseMapper<MediaInfo> {
     @Select("select * from media_info")
     @ResultType(MediaInfo.class)
     List<MediaInfo> selectAll();
+
+
+    @Update("update media_info set status = 1 where post_id = #{postId}")
+    void updateStatusByPostId(String postId);
 }
 
 

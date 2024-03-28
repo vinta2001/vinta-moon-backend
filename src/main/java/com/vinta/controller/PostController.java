@@ -16,6 +16,7 @@ import com.vinta.exception.BusinessException;
 import com.vinta.service.MediaInfoService;
 import com.vinta.service.PostInfoService;
 import com.vinta.service.UserInfoService;
+import com.vinta.service.UserThumbService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -43,6 +44,9 @@ public class PostController {
     @Resource
     private PostInfoService postInfoService;
 
+    @Resource
+    private UserThumbService userThumbService;
+
     @PostMapping("/note/upload")
     @Operation(summary = "上传笔记")
     @Transactional
@@ -55,7 +59,7 @@ public class PostController {
     private PaginationResultDTO<PostResultVO> getResultVOPaginationResultDTO(PaginationBodyVO paginationBodyVO, IPage<PostInfo> postInfoIPage, List<PostResultVO> postResultVOS) {
         PaginationResultDTO<PostResultVO> postResultVOPaginationResultDTO = new PaginationResultDTO<>();
         postResultVOPaginationResultDTO.setCursorScore(paginationBodyVO.getCursorScore());
-        postResultVOPaginationResultDTO.setTotal(postInfoIPage.getTotal());
+        postResultVOPaginationResultDTO.setTotal(postInfoIPage.getPages());
         postResultVOPaginationResultDTO.setCategory(paginationBodyVO.getCategory());
         postResultVOPaginationResultDTO.setSearchKey(paginationBodyVO.getSearchKey());
         postResultVOPaginationResultDTO.setPageNum(postInfoIPage.getCurrent());
@@ -88,8 +92,6 @@ public class PostController {
         postResultVO.setLocation(postInfo.getLocation());
         // todo 需要对数据表中的like进行设置，默认为false
         postResultVO.setLike(false);
-//        log.info("postid: {}",postId);
-//        log.info("mediaUrl: {}", mediaUrl);
         postResultVO.setCover(mediaUrl.get(0));
         postResultVO.setMediaUrl(mediaUrl);
         return postResultVO;
@@ -124,5 +126,12 @@ public class PostController {
                                    @RequestParam("root_comment_id") String rootCommentId,
                                    @RequestParam("content") String content) {
         return ResultDTO.ok("ok");
+    }
+    
+    @GetMapping("/thumb")
+    @Operation(summary = "点赞")
+    public ResultDTO<String> thumb(@RequestParam("userId") String userId,@RequestParam("postId") String postId) {
+        String res = userThumbService.changeStatus(userId, postId);
+        return ResultDTO.ok(res);
     }
 }

@@ -18,4 +18,6 @@ public interface MediaInfoService extends IService<MediaInfo> {
     int insertAll(PostBodyVO postBodyVO);
 
     String getMediaMd5ByPhotoId(String filename);
+
+    void updateStatusByPostId(String postId);
 }

@@ -85,6 +85,13 @@ public class MediaInfoServiceImpl extends ServiceImpl<MediaInfoMapper, MediaInfo
         MediaInfo mediaInfo = mediaInfoMapper.selectOne(new QueryWrapper<MediaInfo>().eq("photo_id", filename));
         return mediaInfo.getMediaMd5();
     }
+
+    @Override
+    public void updateStatusByPostId(String postId) {
+        mediaInfoMapper.updateStatusByPostId(postId);
+    }
+
+
 }
 
 
