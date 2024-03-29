@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.vinta.annotation.UserLoginRequired;
 import com.vinta.constant.Constants;
 import com.vinta.entity.dto.PaginationResultDTO;
+import com.vinta.entity.dto.PostDetail;
 import com.vinta.entity.po.PostInfo;
 import com.vinta.entity.dto.ResultDTO;
 import com.vinta.entity.po.UserInfo;
@@ -109,6 +110,14 @@ public class PostController {
         }
         PaginationResultDTO<PostResultVO> postResultVOPaginationResultDTO = getResultVOPaginationResultDTO(paginationBodyVO, postInfoIPage, postResultVOS);
         return ResultDTO.ok(postResultVOPaginationResultDTO);
+    }
+
+    //获取单篇笔记
+    @GetMapping("/note/{postId}")
+    @Operation(summary = "获取笔记")
+    public ResultDTO getPost(@PathVariable("postId") String postId) {
+        PostDetail postInfo = postInfoService.getPostByPostId(postId);
+        return ResultDTO.ok(postInfo);
     }
 
     @GetMapping("/comment/feed")

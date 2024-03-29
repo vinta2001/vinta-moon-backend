@@ -1,6 +1,7 @@
 package com.vinta.interceptor;
 
 import com.vinta.annotation.UserLoginRequired;
+import com.vinta.component.ThreadLocalComponent;
 import com.vinta.enums.StatusCode;
 import com.vinta.exception.BusinessException;
 import com.vinta.utils.JWTUtil;
@@ -20,6 +21,9 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String token = request.getHeader("Authorization");
+        if(token != null){
+            ThreadLocalComponent.set(jwtUtil.getUserId(token));
+        }
         if(!(handler instanceof HandlerMethod)){
             return true;
         }

@@ -1,18 +1,28 @@
 package com.vinta.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.vinta.component.ThreadLocalComponent;
+import com.vinta.constant.Constants;
+import com.vinta.entity.dto.PostDetail;
+import com.vinta.entity.dto.UserDTO;
 import com.vinta.entity.po.PostInfo;
 import com.vinta.entity.po.QuartzInfo;
+import com.vinta.entity.po.UserInfo;
+import com.vinta.entity.po.UserThumb;
 import com.vinta.entity.vo.PaginationBodyVO;
 import com.vinta.entity.vo.PostBodyVO;
+import com.vinta.entity.vo.PostDTO;
 import com.vinta.enums.MediaAccess;
 import com.vinta.enums.MediaStatus;
 import com.vinta.jobs.SimpleTask;
+import com.vinta.mapper.UserThumbMapper;
 import com.vinta.service.PostInfoService;
 import com.vinta.mapper.PostInfoMapper;
+import com.vinta.service.UserInfoService;
 import com.vinta.utils.DateUtil;
 import com.vinta.utils.QuartzUtils;
 import com.vinta.utils.RandomUtil;
@@ -21,6 +31,7 @@ import io.lettuce.core.ScriptOutputType;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Scheduler;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -43,6 +54,12 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo>
 
     @Resource
     private PostInfoMapper postInfoMapper;
+
+    @Resource
+    private UserInfoService userInfoService;
+
+    @Resource
+    private UserThumbMapper userThumbMapper;
 
     @Resource
     private Scheduler scheduler;
@@ -105,6 +122,27 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo>
     @Override
     public void updateStatusById(String postId) {
         postInfoMapper.updateStatusById(postId);
+    }
+
+    @Override
+    public PostDetail getPostByPostId(String postId) {
+        // 获取postInfo然后转PostDTO
+        PostInfo postInfo = postInfoMapper.selectOne(new LambdaQueryWrapper<PostInfo>().eq(PostInfo::getPostId, postId));
+        PostDTO postDTO = new PostDTO();
+        //获取是否喜欢
+        BeanUtils.copyProperties(postInfo, postDTO);
+        String visitorId = ThreadLocalComponent.get();
+
+        UserThumb userThumb = userThumbMapper.selectByUserIdAndPostId(visitorId, postId);
+        postDTO.setLike(userThumb != null);
+
+        //获取用户信息
+        String userId = postInfo.getUserId();
+        UserInfo userInfo = userInfoService.getUserByUserId(userId);
+        UserDTO userDTO = new UserDTO();
+        BeanUtils.copyProperties(userInfo, userDTO);
+        userDTO.setAvatar(Constants.HOST + userDTO.getAvatar());
+        return PostDetail.builder().post(postDTO).user(userDTO).build();
     }
 }
 

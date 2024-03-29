@@ -1,6 +1,7 @@
 package com.vinta.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.vinta.entity.dto.PostDetail;
 import com.vinta.entity.po.PostInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.vinta.entity.vo.PaginationBodyVO;
@@ -18,4 +19,6 @@ public interface PostInfoService extends IService<PostInfo> {
     int insertOne(PostBodyVO postbodyvo);
 
     void updateStatusById(String postId);
+
+    PostDetail getPostByPostId(String postId);
 }
