@@ -9,16 +9,14 @@ import com.vinta.component.ThreadLocalComponent;
 import com.vinta.constant.Constants;
 import com.vinta.entity.dto.PostDetail;
 import com.vinta.entity.dto.UserDTO;
-import com.vinta.entity.po.PostInfo;
-import com.vinta.entity.po.QuartzInfo;
-import com.vinta.entity.po.UserInfo;
-import com.vinta.entity.po.UserThumb;
+import com.vinta.entity.po.*;
 import com.vinta.entity.vo.PaginationBodyVO;
 import com.vinta.entity.vo.PostBodyVO;
 import com.vinta.entity.vo.PostDTO;
 import com.vinta.enums.MediaAccess;
 import com.vinta.enums.MediaStatus;
 import com.vinta.jobs.SimpleTask;
+import com.vinta.mapper.MediaInfoMapper;
 import com.vinta.mapper.UserThumbMapper;
 import com.vinta.service.PostInfoService;
 import com.vinta.mapper.PostInfoMapper;
@@ -37,10 +35,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author VINTA
@@ -60,6 +55,9 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo>
 
     @Resource
     private UserThumbMapper userThumbMapper;
+
+    @Resource
+    private MediaInfoMapper mediaInfoMapper;
 
     @Resource
     private Scheduler scheduler;
@@ -132,6 +130,14 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo>
         //获取是否喜欢
         BeanUtils.copyProperties(postInfo, postDTO);
         String visitorId = ThreadLocalComponent.get();
+
+        //获取照片url
+        List<MediaInfo> medias = mediaInfoMapper.selectList(new LambdaQueryWrapper<MediaInfo>().eq(MediaInfo::getPostId, postId));
+        ArrayList<String> urls = new ArrayList<>();
+        medias.forEach(mediaInfo -> {
+            urls.add(Constants.HOST+mediaInfo.getPhotoUrl());
+        });
+        postDTO.setMediaList(urls);
 
         UserThumb userThumb = userThumbMapper.selectByUserIdAndPostId(visitorId, postId);
         postDTO.setLike(userThumb != null);

@@ -35,10 +35,10 @@ public class JWTUtil {
         }
         long currentTimeMillis = System.currentTimeMillis();
         jwtBuilder.setIssuedAt(new Date(currentTimeMillis));
-        long expire = currentTimeMillis + expireTime.toMillis();
-        if (expire > 0) {
-            jwtBuilder.setExpiration(new Date(expire));
-        }
+//        long expire = currentTimeMillis + expireTime.toMillis();
+//        if (expire > 0) {
+//            jwtBuilder.setExpiration(new Date(expire));
+//        }
         if (StringUtil.hasContent(secret)) {
             jwtBuilder.signWith(SignatureAlgorithm.HS256, secret);
         }
@@ -54,10 +54,10 @@ public class JWTUtil {
     }
 
     public String getUserId(String token) {
-        boolean validateToken = validateToken(token);
-        if(!validateToken){
-            throw new BusinessException(StatusCode.TOKEN_ERROR);
-        }
+//        boolean validateToken = validateToken(token);
+//        if(!validateToken){
+//            throw new BusinessException(StatusCode.TOKEN_ERROR);
+//        }
         Claims claims = parseToken(token);
         if (claims != null) {
             return claims.getSubject();
