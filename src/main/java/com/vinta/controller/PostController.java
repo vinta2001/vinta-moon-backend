@@ -120,23 +120,6 @@ public class PostController {
         return ResultDTO.ok(postInfo);
     }
 
-    @GetMapping("/comment/feed")
-    @Operation(summary = "获取评论")
-    public ResultDTO getComment(@RequestParam("note_id") String postId,
-                                @RequestParam("root_comment_id") String rootCommentId,
-                                @RequestParam("num") Integer num) {
-        return ResultDTO.ok("ok");
-    }
-
-    @GetMapping("/comment/upload")
-    @Operation(summary = "上传评论")
-    @UserLoginRequired
-    public ResultDTO uploadComment(@NotBlank @RequestHeader("Authorization") String Authorization,
-                                   @RequestParam("root_comment_id") String rootCommentId,
-                                   @RequestParam("content") String content) {
-        return ResultDTO.ok("ok");
-    }
-    
     @GetMapping("/thumb")
     @Operation(summary = "点赞")
     public ResultDTO<String> thumb(@RequestParam("userId") String userId,@RequestParam("postId") String postId) {

@@ -2,6 +2,7 @@ package com.vinta.controller;
 
 import com.vinta.annotation.UserLoginRequired;
 import com.vinta.constant.Constants;
+import com.vinta.entity.dto.UserDTO;
 import com.vinta.entity.vo.LoginBodyVO;
 import com.vinta.entity.vo.RegisterBodyVO;
 import com.vinta.entity.dto.ResultDTO;
@@ -89,6 +90,12 @@ public class UserInfoController {
     public void downloadAvatar(@NotBlank @PathVariable String userId,
                                 HttpServletResponse response) {
         userInfoService.downloadAvatar(userId, response);
+    }
+
+    @GetMapping("/info/{userId}")
+    @Operation(summary = "获取用户信息")
+    public ResultDTO<UserDTO> getUserInfo(@NotBlank @PathVariable("userId") String userId) {
+        return ResultDTO.ok(userInfoService.getUserInfoByUsrId(userId));
     }
 }
 

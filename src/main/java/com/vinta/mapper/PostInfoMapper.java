@@ -14,6 +14,12 @@ public interface PostInfoMapper extends BaseMapper<PostInfo> {
 
     @Update("update post_info set status = 1 where post_id = #{postId}")
     void updateStatusById(String postId);
+
+    @Update("update post_info set comments_num = comments_num + 1 where post_id = #{postId}")
+    void addComments(String postId);
+
+    @Update("update post_info set comments_num = comments_num - 1 where post_id = #{postId}")
+    void deleteComments(String postId);
 }
 
 

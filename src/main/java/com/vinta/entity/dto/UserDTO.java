@@ -17,5 +17,6 @@ public class UserDTO {
     private Date birthday;
     private Integer gender;
     private String description;
-    private String username;
+    private String userName;
+    private String userId;
 }

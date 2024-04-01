@@ -48,6 +48,7 @@ public class UserThumbServiceImpl extends ServiceImpl<UserThumbMapper, UserThumb
         }
     }
 
+    @Transactional
     public void addThumb(String userId, String postId) {
         UserThumb thumb = UserThumb.builder().userId(userId).postId(postId).createTime(new Date()).build();
         userThumbMapper.insert(thumb);
@@ -65,6 +66,7 @@ public class UserThumbServiceImpl extends ServiceImpl<UserThumbMapper, UserThumb
         userInfoMapper.updateById(userInfo);
     }
 
+    @Transactional
     public void removeThumb(String userId, String postId) {
         userThumbMapper.deleteByUserIdAndPostId(userId, postId);
 

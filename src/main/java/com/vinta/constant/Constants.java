@@ -42,6 +42,9 @@ public class Constants {
     public static final String THUMB_UP_SUCCESS = "点赞成功";
     public static final String THUMB_CANCEL_SUCCESS = "取消成功";
 
+    public static final Integer STATUS_AVAILABLE = 1;
+    public static final Integer STATUS_UNAVAILABLE = 0;
+
 
 
 }

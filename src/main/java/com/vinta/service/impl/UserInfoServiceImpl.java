@@ -3,6 +3,7 @@ package com.vinta.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.vinta.constant.Constants;
+import com.vinta.entity.dto.UserDTO;
 import com.vinta.entity.po.UserInfo;
 import com.vinta.entity.vo.LoginBodyVO;
 import com.vinta.entity.vo.RegisterBodyVO;
@@ -19,6 +20,7 @@ import com.vinta.utils.RandomUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -177,6 +179,15 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     @Transactional
     public UserInfo getUserByUserId(String id) {
         return userInfoMapper.selectByUserId(id);
+    }
+
+    @Override
+    public UserDTO getUserInfoByUsrId(String userId) {
+        UserInfo userInfo = userInfoMapper.selectByUserId(userId);
+        UserDTO userDTO = new UserDTO();
+        BeanUtils.copyProperties(userInfo,userDTO);
+        userDTO.setAvatar(Constants.HOST+userDTO.getAvatar());
+        return userDTO;
     }
 }
 

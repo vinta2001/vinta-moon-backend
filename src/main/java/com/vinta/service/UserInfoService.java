@@ -1,5 +1,6 @@
 package com.vinta.service;
 
+import com.vinta.entity.dto.UserDTO;
 import com.vinta.entity.po.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.vinta.entity.vo.LoginBodyVO;
@@ -33,4 +34,6 @@ public interface UserInfoService extends IService<UserInfo> {
     void downloadAvatar(String userId, HttpServletResponse response);
 
     UserInfo getUserByUserId(String id);
+
+    UserDTO getUserInfoByUsrId(String userId);
 }
