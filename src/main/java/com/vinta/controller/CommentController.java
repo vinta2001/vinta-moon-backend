@@ -1,9 +1,7 @@
 package com.vinta.controller;
 
-import com.vinta.annotation.UserLoginRequired;
 import com.vinta.entity.dto.CommentPageDTO;
 import com.vinta.entity.dto.ResultDTO;
-import com.vinta.entity.po.CommentInfo;
 import com.vinta.entity.vo.CommentBodyVO;
 import com.vinta.entity.vo.CommentPageVO;
 import com.vinta.service.CommentInfoService;

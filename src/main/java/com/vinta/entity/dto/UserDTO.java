@@ -1,6 +1,5 @@
 package com.vinta.entity.dto;
 
-import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
